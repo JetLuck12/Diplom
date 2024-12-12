@@ -1,4 +1,4 @@
-#include "mocklcard.h"
+#include "MockDevice.h"
 
 void MockLcard::generate_data() {
     // Имитация получения данных

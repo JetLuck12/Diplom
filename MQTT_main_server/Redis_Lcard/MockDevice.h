@@ -1,5 +1,5 @@
-#ifndef MOCKLCARD_H
-#define MOCKLCARD_H
+#ifndef MOCKDEVICE_H
+#define MOCKDEVICE_H
 
 #include <iostream>
 #include <vector>
@@ -11,8 +11,9 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include "DeviceInterface.h"
 
-class MockLcard {
+class MockLcard : public DeviceInterface {
 private:
     std::atomic<bool> running;                  // Состояние фотодиода
     std::mutex data_mutex;                      // Мьютекс для управления доступом к данным
@@ -26,10 +27,16 @@ private:
 public:
     MockLcard();
     ~MockLcard();
-    bool init();
-    void start();
-    void stop();
-    float get_data();
+    bool init() override;
+    void start() override;
+    void stop() override;
+    float get_data() override;
 };
 
-#endif // MOCKLCARD_H
+// Функция для создания имитационного устройства
+std::unique_ptr<DeviceInterface> create_mock_device() {
+    // Используем заранее написанный класс MockDevice
+    return std::make_unique<MockLcard>();
+}
+
+#endif // MOCKDEVICE_H
