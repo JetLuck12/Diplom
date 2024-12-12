@@ -1,0 +1,14 @@
+{
+    "files": [
+        "IHandler.py",
+        "RedisHandler.py",
+        "TangoHandler.py",
+        "Tango_SMC/MCA8000A.py",
+        "Tango_SMC/MockSMCMotorHW.py",
+        "Tango_SMC/SMCBaseMotorController.py",
+        "Tango_SMC/SMCControllerMQTTBridge.py",
+        "Tango_SMC/smc100_new.py",
+        "Tango_SMC/smc_macro.py",
+        "main.py"
+    ]
+}
