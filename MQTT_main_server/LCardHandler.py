@@ -13,6 +13,7 @@ class LCardHandler(IHandler):
         self.command_topic = f"{name}/commands"  # Топик для отправки команд
         self.data_topic = f"{name}/data"        # Топик для получения данных
         self.error_topic = f"{name}/errors"     # Топик для получения ошибок
+        self.status_topic = f"{name}/status"     # Топик для получения статуса
 
         self.last_data = None                   # Последние полученные данные
         self.error_state = None                 # Последнее состояние ошибок
@@ -69,5 +70,7 @@ class LCardHandler(IHandler):
             elif topic == self.error_topic:
                 self.error_state = data.get("error", None)
                 print(f"[LCardHandler] Error received: {data}")
+            elif topic == self.status_topic:
+                print(f"[LCardHandler] Status received: {data}")
         except json.JSONDecodeError:
             print(f"[LCardHandler] Failed to decode message on topic {topic}: {payload}")

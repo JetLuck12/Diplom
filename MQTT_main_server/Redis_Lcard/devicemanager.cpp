@@ -13,9 +13,19 @@ bool DeviceManager::init() {
 }
 
 void DeviceManager::start() {
-    if (device) {
+    if (!running) {
         device->start();
         running = true;
+
+        // Запускаем поток для сбора данных
+        std::thread([this]() {
+            while (running) {
+                measure_and_store();
+                std::this_thread::sleep_for(std::chrono::seconds(1)); // Частота измерений
+            }
+        }).detach();
+
+        std::cout << "Device started.\n";
     }
 }
 
@@ -100,18 +110,28 @@ void DeviceManager::measure_and_store() {
 
 void DeviceManager::collect_data() {
     if (running) {
-        int timestamp = static_cast<int>(std::time(nullptr));
+        int current_time = static_cast<int>(std::time(nullptr)); // Текущее время в секундах
         float value = device->get_data();
-        data[timestamp] = value;
+
+        // Добавляем новую запись
+        data[current_time] = value;
+
+        // Ограничиваем размер данных
+        enforce_data_limit();
     }
 }
 
 void DeviceManager::send_data(MQTTHandler& mqtt) {
     json response;
-    response["data"] = json::array();
 
-    for (const auto& [time, value] : data) {
-        response["data"].push_back({{"time", time}, {"value", value}});
+    if (!data.empty()) {
+        // Получаем последний элемент в std::map
+        auto last_entry = std::prev(data.end());
+        response["time"] = last_entry->first;
+        response["value"] = last_entry->second;
+    } else {
+        // Если данных нет, отправляем сообщение об этом
+        response["error"] = "No data available";
     }
 
     mqtt.publish("lcard/data", response.dump());
@@ -128,5 +148,12 @@ void DeviceManager::send_data_since(int timestamp, MQTTHandler& mqtt) {
     }
 
     mqtt.publish("lcard/data", response.dump());
+}
+
+void DeviceManager::enforce_data_limit() {
+    while (data.size() > MAX_DATA_SIZE) {
+        // Удаляем элемент с наименьшим ключом (самое старое значение)
+        data.erase(data.begin());
+    }
 }
 

@@ -37,6 +37,7 @@ public:
     void measure_and_store(); // Новый метод для фонового сбора данных
 
 private:
+    static constexpr size_t MAX_DATA_SIZE = 100; // Максимальное количество записей
     std::unique_ptr<DeviceInterface> device;
     bool running;
     std::map<int, float> data; // Map to store time:value pairs
@@ -44,4 +45,5 @@ private:
     void collect_data();
     void send_data(MQTTHandler& mqtt);
     void send_data_since(int timestamp, MQTTHandler& mqtt);
+    void enforce_data_limit(); // Метод для удаления старых данных
 };

@@ -1,12 +1,15 @@
-#include "mqtthandler.h"
+#include <mosquitto.h>
+#include <string>
+#include <functional>
 #include <iostream>
+#include "mqtthandler.h"
 
 MQTTHandler::MQTTHandler(const std::string& broker_address, int port)
     : broker_address(broker_address), port(port), mosq(nullptr) {
     mosquitto_lib_init();
-    mosq = mosquitto_new(nullptr, true, nullptr);
+    mosq = mosquitto_new(nullptr, true, this);
     if (!mosq) {
-        throw std::runtime_error("Failed to initialize Mosquitto instance");
+        throw std::runtime_error("Failed to create mosquitto instance.");
     }
 }
 
@@ -18,32 +21,37 @@ MQTTHandler::~MQTTHandler() {
 }
 
 bool MQTTHandler::connect() {
-    int ret = mosquitto_connect(mosq, broker_address.c_str(), port, 60);
-    if (ret != MOSQ_ERR_SUCCESS) {
-        std::cerr << "Failed to connect to MQTT broker: " << mosquitto_strerror(ret) << std::endl;
+    if (mosquitto_connect(mosq, broker_address.c_str(), port, 60) != MOSQ_ERR_SUCCESS) {
         return false;
     }
+    mosquitto_loop_start(mosq);
     return true;
 }
 
 void MQTTHandler::disconnect() {
-    mosquitto_disconnect(mosq);
+    if (mosq) {
+        mosquitto_disconnect(mosq);
+        mosquitto_loop_stop(mosq, true);
+    }
 }
 
 bool MQTTHandler::publish(const std::string& topic, const std::string& message) {
-    int ret = mosquitto_publish(mosq, nullptr, topic.c_str(), message.size(), message.c_str(), 0, false);
-    if (ret != MOSQ_ERR_SUCCESS) {
-        std::cerr << "Failed to publish message: " << mosquitto_strerror(ret) << std::endl;
-        return false;
-    }
-    return true;
+    int ret = mosquitto_publish(mosq, nullptr, topic.c_str(), message.size(), message.c_str(), 1, false);
+    return ret == MOSQ_ERR_SUCCESS;
 }
 
-void MQTTHandler::subscribe(const std::string& topic) {
-    int ret = mosquitto_subscribe(mosq, nullptr, topic.c_str(), 0);
-    if (ret != MOSQ_ERR_SUCCESS) {
-        std::cerr << "Failed to subscribe to topic: " << mosquitto_strerror(ret) << std::endl;
-    }
+void MQTTHandler::subscribe(const std::string& topic, std::function<void(const std::string&)> callback) {
+    subscriptions[topic] = callback;
+    mosquitto_message_callback_set(mosq, [](struct mosquitto*, void* userdata, const struct mosquitto_message* msg) {
+        auto* handler = static_cast<MQTTHandler*>(userdata);
+        std::string topic = msg->topic;
+        std::string payload(static_cast<const char*>(msg->payload), msg->payloadlen);
+
+        if (handler->subscriptions.count(topic)) {
+            handler->subscriptions[topic](payload);
+        }
+    });
+    mosquitto_subscribe(mosq, nullptr, topic.c_str(), 1);
 }
 
 struct mosquitto* MQTTHandler::get_mosq() const {

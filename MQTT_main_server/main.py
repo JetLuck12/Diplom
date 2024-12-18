@@ -52,7 +52,7 @@ class MainComputer:
             print("Connected to MQTT broker!")
             # Подписываемся только на каналы data и errors
             for participant in self.handlers:
-                for channel in ["data", "errors"]:
+                for channel in ["data", "errors", "status"]:
                     topic = f"{participant}/{channel}"
                     client.subscribe(topic)
                     print(f"Subscribed to {topic}")

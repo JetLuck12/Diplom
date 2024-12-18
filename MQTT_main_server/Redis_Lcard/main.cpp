@@ -19,16 +19,21 @@ int main() {
             return 1;
         }
 
-        DeviceManager manager(true); // false - реальное устройство
+        DeviceManager manager(true);
         manager.init();
 
-        // Настраиваем callback для обработки сообщений
-        mosquitto_message_callback_set(mqtt.get_mosq(), on_message);
-        mosquitto_user_data_set(mqtt.get_mosq(), &manager);
-        mqtt.subscribe("lcard/commands");
+        // Подписка на топик с командами
+        mqtt.subscribe("lcard/commands", [&manager, &mqtt](const std::string& message) {
+            manager.handle_command(message, mqtt);
+        });
 
-        std::cout << "Listening for MQTT commands...\n";
-        mosquitto_loop_forever(mqtt.get_mosq(), -1, 1);
+        std::cout << "DeviceManager is running. Waiting for commands..." << std::endl;
+        while (true) {
+            // Бесконечный цикл для работы с устройством
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+
+        mqtt.disconnect();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
