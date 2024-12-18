@@ -1,7 +1,7 @@
 {
     "files": [
         "IHandler.py",
-        "RedisHandler.py",
+        "LCardHandler.py",
         "TangoHandler.py",
         "Tango_SMC/MCA8000A.py",
         "Tango_SMC/MockSMCMotorHW.py",

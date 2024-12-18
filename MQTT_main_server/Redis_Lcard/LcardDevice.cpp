@@ -1,7 +1,8 @@
 #include "LcardDevice.h"
-#include <stdio.h>
+#include <iostream>
 #include "Lcard_packs/include/ltrapi.h"
 #include "Lcard_packs/include/ltr114api.h"
+
 
 #define SIZE 1
 
@@ -172,4 +173,8 @@ void LcardDevice::stop() {
     if (LTR114_Close(ltr) != 0) {
         std::cerr << "Failed to close the device.\n";
     }
+}
+
+std::unique_ptr<DeviceInterface> create_real_device() {
+    return std::make_unique<LcardDevice>();
 }

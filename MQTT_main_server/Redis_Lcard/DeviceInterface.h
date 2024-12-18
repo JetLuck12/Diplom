@@ -1,8 +1,5 @@
-#ifndef DEVICEINTERFACE_H
-#define DEVICEINTERFACE_H
-
-#include <iostream>
-#include <memory> // Для std::unique_ptr
+#pragma once
+#include <memory>
 
 // Интерфейс устройства
 class DeviceInterface {
@@ -22,4 +19,6 @@ public:
     virtual void stop() = 0;
 };
 
-#endif // DEVICEINTERFACE_H
+std::unique_ptr<DeviceInterface> create_mock_device(); // Only declaration
+std::unique_ptr<DeviceInterface> create_real_device();
+

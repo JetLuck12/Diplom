@@ -1,46 +1,36 @@
 #include <iostream>
-#include "MockDevice.h"
-#include "DeviceInterface.h"
-#include "LcardDevice.h"
+#include "devicemanager.h"
+#include "mqtthandler.h"
 
-
-
-// Реализация create_device
-// Эта функция предполагает, что классы MockDevice и RealDevice уже написаны
-std::unique_ptr<DeviceInterface> create_device(bool test_flag) {
-    if (test_flag) {
-        // Возвращаем экземпляр имитационного устройства
-        return std::unique_ptr<DeviceInterface>(create_mock_device());
-    } else {
-        // Возвращаем экземпляр реального устройства
-        return std::unique_ptr<DeviceInterface>(create_real_device());
+void on_message(struct mosquitto*, void* obj, const struct mosquitto_message* message) {
+    if (message->payloadlen) {
+        auto* manager = static_cast<DeviceManager*>(obj);
+        std::string command(static_cast<char*>(message->payload), message->payloadlen);
+        MQTTHandler mqtt("localhost", 1883);
+        manager->handle_command(command, mqtt);
     }
 }
 
 int main() {
-    bool test_flag = true; // Флаг: true для имитационного устройства, false для реального
+    try {
+        MQTTHandler mqtt("localhost", 1883);
+        if (!mqtt.connect()) {
+            std::cerr << "Failed to connect to MQTT broker." << std::endl;
+            return 1;
+        }
 
-    // Выбор устройства в зависимости от test_flag
-    std::unique_ptr<DeviceInterface> device = create_device(test_flag);
+        DeviceManager manager(true); // false - реальное устройство
+        manager.init();
 
-    // Инициализация устройства
-    if (!device->init()) {
-        std::cerr << "Failed to initialize device.\n";
-        return 1;
+        // Настраиваем callback для обработки сообщений
+        mosquitto_message_callback_set(mqtt.get_mosq(), on_message);
+        mosquitto_user_data_set(mqtt.get_mosq(), &manager);
+        mqtt.subscribe("lcard/commands");
+
+        std::cout << "Listening for MQTT commands...\n";
+        mosquitto_loop_forever(mqtt.get_mosq(), -1, 1);
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
     }
-
-    // Запуск устройства
-    device->start();
-
-    // Чтение данных
-    for (int i = 0; i < 10; ++i) {
-        float data = device->get_data();
-        std::cout << "Received data: " << data << '\n';
-    }
-
-    // Остановка устройства
-    device->stop();
-
     return 0;
 }
-

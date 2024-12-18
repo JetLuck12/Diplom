@@ -56,3 +56,9 @@ float MockLcard::get_data() {
     return 0.0f; // Возвращаем 0, если данных нет
 }
 
+// Функция для создания имитационного устройства
+std::unique_ptr<DeviceInterface> create_mock_device() {
+    // Используем заранее написанный класс MockDevice
+    return std::make_unique<MockLcard>();
+}
+

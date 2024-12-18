@@ -2,7 +2,9 @@
 import paho.mqtt.client as mqtt
 import json
 from TangoHandler import TangoHandler
+from LCardHandler import LCardHandler
 from IHandler import IHandler
+
 
 class RedisHandler(IHandler):
     """Обработчик для Redis."""
@@ -28,7 +30,8 @@ class MainComputer:
 
         # Инициализация обработчиков участников
         self.handlers = {
-            "smc": TangoHandler("smc", self.client),
+            #"smc": TangoHandler("smc", self.client),
+            "lcard": LCardHandler("lcard", self.client)
         }
 
     def connect(self):
@@ -78,7 +81,7 @@ def main():
             # Пример отправки сообщений
             command = input("Write command:")
             command = command.split(" ")
-            computer.handlers["smc"].send_command(command[0], command[1] if len(command) > 1 else "", command[2] if len(command) > 2 else "")
+            computer.handlers["lcard"].send_command(command[0], command[1] if len(command) > 1 else "", command[2] if len(command) > 2 else "")
     except KeyboardInterrupt:
         print("Exiting...")
     finally:

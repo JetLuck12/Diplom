@@ -1,5 +1,4 @@
-#ifndef MOCKDEVICE_H
-#define MOCKDEVICE_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -12,6 +11,8 @@
 #include <mutex>
 #include <condition_variable>
 #include "DeviceInterface.h"
+
+std::unique_ptr<DeviceInterface> create_mock_device();
 
 class MockLcard : public DeviceInterface {
 private:
@@ -33,10 +34,3 @@ public:
     float get_data() override;
 };
 
-// Функция для создания имитационного устройства
-std::unique_ptr<DeviceInterface> create_mock_device() {
-    // Используем заранее написанный класс MockDevice
-    return std::make_unique<MockLcard>();
-}
-
-#endif // MOCKDEVICE_H
