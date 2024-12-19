@@ -24,6 +24,13 @@ class LCardHandler(IHandler):
         self.mqtt_client.subscribe(self.error_topic)
         print(f"[LCardHandler] Subscribed to topics: {self.data_topic}, {self.error_topic}")
 
+        self.commands = {
+                    "start": {"params": [], "description": "Start measurement"},
+                    "stop": {"params": [], "description": "Stop measurement"},
+                    "get_data": {"params": [], "description": "Get data"},
+                    "get_data_since": {"params": ["timestamp"], "description": "Get data since timestamp"},
+                }
+
     def send_command(self, command: str, axis: int = 0, args: dict = None):
         """
         Отправляет команду в MQTT для LCard.
@@ -74,3 +81,8 @@ class LCardHandler(IHandler):
                 print(f"[LCardHandler] Status received: {data}")
         except json.JSONDecodeError:
             print(f"[LCardHandler] Failed to decode message on topic {topic}: {payload}")
+
+
+    def get_available_commands(self):
+        """Возвращает список доступных команд."""
+        return self.commands

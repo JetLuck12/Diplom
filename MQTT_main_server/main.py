@@ -4,6 +4,7 @@ import json
 from TangoHandler import TangoHandler
 from LCardHandler import LCardHandler
 from IHandler import IHandler
+from gui_module import start_gui
 
 
 class RedisHandler(IHandler):
@@ -30,7 +31,7 @@ class MainComputer:
 
         # Инициализация обработчиков участников
         self.handlers = {
-            #"smc": TangoHandler("smc", self.client),
+            "smc": TangoHandler("smc", self.client),
             "lcard": LCardHandler("lcard", self.client)
         }
 
@@ -59,6 +60,9 @@ class MainComputer:
         else:
             print(f"Connection failed with code {rc}")
 
+    def get_handler(self, device_name):
+            return self.handlers.get(device_name)
+
     def on_message(self, client, userdata, message):
         """Обработчик сообщений."""
         topic = message.topic
@@ -71,17 +75,11 @@ class MainComputer:
 
 
 def main():
-    # Создаем экземпляр MainComputer
     computer = MainComputer(broker_address="localhost", port=1883)
-    # Подключаемся к брокеру
-    try:
-        computer.connect()
+    computer.connect()
 
-        while True:
-            # Пример отправки сообщений
-            command = input("Write command:")
-            command = command.split(" ")
-            computer.handlers["lcard"].send_command(command[0], command[1] if len(command) > 1 else "", command[2] if len(command) > 2 else "")
+    try:
+        start_gui(computer)  # Передаем в GUI
     except KeyboardInterrupt:
         print("Exiting...")
     finally:

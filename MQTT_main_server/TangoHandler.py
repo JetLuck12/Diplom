@@ -20,6 +20,15 @@ class TangoHandler(IHandler):
         self.mqtt_client.subscribe(self.smc_errors_topic)
         print(f"[TangoHandler] Subscribed to topics: {self.smc_data_topic}, {self.smc_errors_topic}")
 
+        self.commands = {
+                    "move": {"params": ["axis", "position"], "description": "Move to position"},
+                    "stop": {"params": ["axis"], "description": "Stop movement"},
+                    "add": {"params": ["axis"], "description": "Add a device"},
+                    "delete": {"params": ["axis"], "description": "Delete a device"},
+                    "get_state": {"params": ["axis"], "description": "Get the state of the axis"},
+                    "get_position": {"params": ["axis"], "description": "Get the position of the axis"},
+                }
+
     def send_command(self, command: str, axis: int, args: dict):
         """
         Отправляет команду в MQTT для SMCControllerMQTTBridge.
@@ -69,3 +78,10 @@ class TangoHandler(IHandler):
                 print(f"[TangoHandler] Error received: {data}")
         except json.JSONDecodeError:
             print(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
+
+
+    def get_available_commands(self):
+        """Возвращает список доступных команд."""
+        return self.commands
+
+

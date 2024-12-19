@@ -9,6 +9,7 @@
         "Tango_SMC/SMCControllerMQTTBridge.py",
         "Tango_SMC/smc100_new.py",
         "Tango_SMC/smc_macro.py",
+        "gui_module.py",
         "main.py"
     ]
 }
