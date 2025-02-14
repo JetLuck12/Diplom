@@ -12,7 +12,9 @@ add_executable(Redis_LCard main.cpp
     LcardDevice.cpp LcardDevice.h
     mqtthandler.h mqtthandler.cpp
     devicemanager.h devicemanager.cpp
-    json.hpp)
+    json.hpp
+    MQTTMessage.h
+    MQTTMessage.cpp)
 
 # Укажите путь к заголовочным файлам
 include_directories(${LCARD_DIR}/include)

@@ -1,8 +1,5 @@
 {
     "files": [
-        "IHandler.py",
-        "LCardHandler.py",
-        "TangoHandler.py",
         "Tango_SMC/MCA8000A.py",
         "Tango_SMC/MockSMCMotorHW.py",
         "Tango_SMC/SMCBaseMotorController.py",
@@ -10,6 +7,16 @@
         "Tango_SMC/smc100_new.py",
         "Tango_SMC/smc_macro.py",
         "gui_module.py",
-        "main.py"
+        "__init__.py",
+        "main.py",
+        "test.py",
+        "Tango_SMC/__init__.py",
+        "Handlers/IHandler.py",
+        "Handlers/LCardHandler.py",
+        "Handlers/TangoHandler.py",
+        "Utils/MQTTMessage.py",
+        "Handlers/__init__.py",
+        "Utils/__init__.py",
+        "main_computer.py"
     ]
 }
