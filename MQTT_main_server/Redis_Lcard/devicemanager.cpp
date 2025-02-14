@@ -43,6 +43,7 @@ void DeviceManager::handle_command(const std::string& command_json, MQTTHandler&
 
         std::string command = command_data.at("command");
         if (command == "start") {
+            printf("statring");
             start();
             mqtt.publish("lcard/status", R"({"status":"started"})");
         } else if (command == "stop") {

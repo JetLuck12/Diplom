@@ -108,7 +108,7 @@ float get_ltr_data(TLTR114* ltr)
     int array_size = 1;
 
     DWORD data[SIZE];
-    double dest[1];
+    double dest[100];
 
     int error = LTR114_Recv(ltr, data, NULL, ltr->FrameLength, 100);
     if (error < 0) {
@@ -155,9 +155,7 @@ bool LcardDevice::init() {
 
 // Запуск устройства
 void LcardDevice::start() {
-    if (LTR114_Start(ltr) != 0) {
-        std::cerr << "Failed to start the device.\n";
-    }
+    return;
 }
 
 // Получение данных с устройства
