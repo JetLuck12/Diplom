@@ -82,11 +82,11 @@ class SMCControllerMQTTBridge:
         """Обработка команд от MQTT."""
         command = str(message.command)
         axis = str(message.params[0])
-        params = str(message.params[1:])
+        params = message.params[1:]
 
         try:
             if command == "move":
-                position = float(params)
+                position = float(params[0])
                 if axis is not None and position is not None:
                     self.smc_controller.StartOne(axis, position)
                     self.publish_data(axis, {"status": "Moving", "position": position})
