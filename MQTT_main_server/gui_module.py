@@ -3,10 +3,11 @@ import json
 import pyqtgraph as pg
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QTabWidget, QWidget,
-    QVBoxLayout, QLabel, QPushButton, QComboBox, QLineEdit, QTextEdit, QHBoxLayout
+    QVBoxLayout, QLabel, QPushButton, QComboBox, QLineEdit, QTextEdit, QHBoxLayout, QFormLayout
 )
 from PyQt5.QtCore import QTimer
 from datetime import datetime
+from Utils.MQTTMessage import MQTTMessage
 
 
 class DataTab(QWidget):
@@ -58,7 +59,9 @@ class ControlTab(QWidget):
         self.command_selector = QComboBox()
         self.command_selector.addItems(["start", "stop", "get_data", "get_data_since"])
 
-        self.argument_input = QLineEdit()
+        self.arguments_layout = QVBoxLayout()
+        self.argument_fields = []
+
         self.send_button = QPushButton("Отправить команду")
         self.error_status = QTextEdit()
         self.error_status.setReadOnly(True)
@@ -69,12 +72,15 @@ class ControlTab(QWidget):
         command_layout.addWidget(self.device_selector)
         command_layout.addWidget(QLabel("Команда:"))
         command_layout.addWidget(self.command_selector)
-        command_layout.addWidget(QLabel("Аргументы:"))
-        command_layout.addWidget(self.argument_input)
-        command_layout.addWidget(self.send_button)
+
+        arguments_container = QWidget()
+        arguments_container.setLayout(self.arguments_layout)
 
         main_layout = QVBoxLayout()
         main_layout.addLayout(command_layout)
+        main_layout.addWidget(QLabel("Аргументы:"))
+        main_layout.addWidget(arguments_container)
+        main_layout.addWidget(self.send_button)
         main_layout.addWidget(QLabel("Ошибки и статус:"))
         main_layout.addWidget(self.error_status)
 
@@ -82,6 +88,7 @@ class ControlTab(QWidget):
 
         # Подключение сигналов
         self.device_selector.currentTextChanged.connect(self.update_command_list)
+        self.command_selector.currentTextChanged.connect(self.update_argument_fields)
         self.send_button.clicked.connect(self.send_command)
 
         self.update_command_list()
@@ -98,19 +105,47 @@ class ControlTab(QWidget):
                 description = details.get("description", "")
                 self.command_selector.addItem(f"{command} ({description})", command)
 
+        self.update_argument_fields()
+
+    def update_argument_fields(self):
+            """Обновляет поля ввода аргументов на основе выбранной команды."""
+            # Очистка текущих полей и меток
+            while self.arguments_layout.count():
+                item = self.arguments_layout.takeAt(0)
+                widget = item.widget()
+                if widget:
+                    widget.deleteLater()
+            self.argument_fields = []
+
+            # Получение описания команды
+            selected_device = self.device_selector.currentText()
+            selected_command = self.command_selector.currentText().split(" ")[0]
+            handler = self.mqtt_client.get_handler(selected_device)
+
+            if handler:
+                command_details = handler.get_command_details(selected_command)
+                if command_details:
+                    for arg in command_details.get("params", []):
+                        label = QLabel(arg)
+                        input_field = QLineEdit()
+                        self.arguments_layout.addWidget(label)
+                        self.arguments_layout.addWidget(input_field)
+                        self.argument_fields.append(input_field)
+
+
     def send_command(self):
         """Отправляет команду через MQTT."""
         device = self.device_selector.currentText()
-        command = self.command_selector.currentText()
-        args = self.argument_input.text()
-
-        payload = {
-            "command": command,
-            "params": {"args": args}
-        }
+        command = self.command_selector.currentText().split(" ")[0]
+        params = [field.text() for field in self.argument_fields]
         topic = f"{device}/commands"
-        self.mqtt_client.client.publish(topic, json.dumps(payload))
-        self.error_status.append(f"Отправлено: {payload}")
+        payload = MQTTMessage(topic=topic,
+                    command=command,
+                    params=params,
+                    device=device,)
+
+        payload.publish(self.mqtt_client.client)
+        self.error_status.append(f"Отправлено: {payload.__str__()}")
 
 
 class MainWindow(QMainWindow):
@@ -147,7 +182,6 @@ class MainWindow(QMainWindow):
         """Запрашивает данные у обработчика и обновляет интерфейс."""
         if self.mqtt_handler:
             try:
-                print("try to fetch data")
                 # Запрос последних данных у обработчика
                 last_data = self.mqtt_handler.get_handler("lcard").get_data()
                 if last_data:
@@ -165,3 +199,4 @@ def start_gui(mqtt_handler):
     main_window = MainWindow(mqtt_handler)
     main_window.show()
     sys.exit(app.exec_())
+

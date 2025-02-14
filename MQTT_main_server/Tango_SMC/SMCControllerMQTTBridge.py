@@ -3,6 +3,13 @@ from MockSMCMotorHW import MockSMCMotorHW
 import paho.mqtt.client as mqtt
 import json
 import time
+import os
+import sys
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(project_root)
+
+from Utils.MQTTMessage import MQTTMessage
 
 class SMCControllerMQTTBridge:
     def __init__(self, mqtt_broker, mqtt_port, mqtt_topic_prefix, smc_controller):
@@ -20,7 +27,7 @@ class SMCControllerMQTTBridge:
         self.smc_controller = smc_controller
 
         # Инициализация MQTT клиента
-        self.client = mqtt.Client()
+        self.client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 
@@ -36,7 +43,7 @@ class SMCControllerMQTTBridge:
         self.client.disconnect()
         print("Disconnected from MQTT broker.")
 
-    def on_connect(self, client, userdata, flags, rc):
+    def on_connect(self, client, userdata, flags, rc, *args):
         """Обработчик события подключения к брокеру."""
         if rc == 0:
             print("Connected to MQTT broker successfully.")
@@ -47,23 +54,35 @@ class SMCControllerMQTTBridge:
         else:
             print(f"Failed to connect, return code {rc}")
 
-    def on_message(self, client, userdata, message):
+    def on_message(self, *args):
         """Обработчик входящих сообщений."""
+        client, userdata, message = args
         topic = message.topic
-        payload = message.payload.decode('utf-8')
-
+        print(topic)
         try:
-            data = json.loads(payload)
-            print(f"Received message on topic {topic}: {data}")
-            self.handle_command(data)
+            # Декодируем payload в строку
+            message_str = message.payload.decode("utf-8")
+            # Выводим JSON-данные
+            print("Получено сообщение:", message_str)
+
+        except json.JSONDecodeError as e:
+            print(f"Ошибка парсинга JSON: {e}")
+        message = MQTTMessage.from_json(message_str)
+
+
+        if topic != "smc/commands":
+            raise Exception(f"bad topic: {topic}")
+        try:
+            print(f"Received message on topic {topic}: {message.__str__()}")
+            self.handle_command(message)
         except json.JSONDecodeError:
             self.publish_error("Invalid JSON format", topic)
 
-    def handle_command(self, data):
+    def handle_command(self, message):
         """Обработка команд от MQTT."""
-        command = str(data.get("command"))
-        axis = str(data.get("axis"))
-        params = data.get("params")
+        command = str(message.command)
+        axis = str(message.params[0])
+        params = str(message.params[1:])
 
         try:
             if command == "move":
@@ -82,6 +101,7 @@ class SMCControllerMQTTBridge:
             elif command == "add":
                 if axis is not None:
                     self.smc_controller.AddDevice(axis)
+                    print("added")
                 else:
                     raise ValueError("Missing axis parameter")
             elif command == "delete":
@@ -122,6 +142,7 @@ class SMCControllerMQTTBridge:
 
 
 def main():
+
     # Выбор контроллера (Mock или реальный)
     print("Starting SMC Controller MQTT Bridge...")
     test_mode = True  # True для использования MockSMCMotorHW
@@ -145,6 +166,7 @@ def main():
         print("\nExiting...")
     finally:
         mqtt_bridge.disconnect()
+
 
 
 if __name__ == "__main__":
