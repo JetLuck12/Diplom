@@ -101,7 +101,6 @@ class SMCControllerMQTTBridge:
             elif command == "add":
                 if axis is not None:
                     self.smc_controller.AddDevice(axis)
-                    print("added")
                 else:
                     raise ValueError("Missing axis parameter")
             elif command == "delete":
@@ -128,7 +127,7 @@ class SMCControllerMQTTBridge:
 
     def publish_data(self, axis, data):
         """Публикация данных в канал `smc/data`."""
-        topic = f"{self.mqtt_topic_prefix}/data"
+        topic = "smc/data"
         message = {"axis": axis, "data": data}
         self.client.publish(topic, json.dumps(message))
         print(f"Published data to {topic}: {message}")

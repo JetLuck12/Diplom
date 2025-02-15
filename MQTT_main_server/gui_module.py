@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import QTimer
 from datetime import datetime
 from Utils.MQTTMessage import MQTTMessage
+from main_computer import MainComputer
 
 
 class DataTab(QWidget):
@@ -149,9 +150,10 @@ class ControlTab(QWidget):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, mqtt_handler=None):
+    def __init__(self):
         super().__init__()
-        self.mqtt_handler = mqtt_handler
+        self.mqtt_handler = MainComputer(broker_address="localhost", port=1883, client_id="main_computer")
+        self.mqtt_handler.connect()
 
         # Основной интерфейс
         self.setWindowTitle("Управление проектом")
@@ -159,8 +161,11 @@ class MainWindow(QMainWindow):
 
         # Вкладки
         self.tabs = QTabWidget()
-        self.data_tab = DataTab(mqtt_handler)
-        self.control_tab = ControlTab(mqtt_handler)
+        self.data_tab = DataTab(self.mqtt_handler)
+        self.control_tab = ControlTab(self.mqtt_handler)
+
+        for handler in self.mqtt_handler.handlers.values():
+            handler.info_tab = self.control_tab
 
         self.tabs.addTab(self.data_tab, "Данные")
         self.tabs.addTab(self.control_tab, "Управление")
@@ -172,15 +177,13 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self.fetch_data)
         self.timer.start(100)
 
+    def closeEvent(self, event):
+        self.mqtt_handler.disconnect()
+        event.accept()
+
     def fetch_data(self):
-        payload = {
-            "command": "get_data",
-            "params": {"args": ""}
-        }
-        topic = "lcard/commands"
-        self.mqtt_handler.client.publish(topic, json.dumps(payload))
         """Запрашивает данные у обработчика и обновляет интерфейс."""
-        if self.mqtt_handler:
+        if "lcard" in self.mqtt_handler.handlers.keys():
             try:
                 # Запрос последних данных у обработчика
                 last_data = self.mqtt_handler.get_handler("lcard").get_data()
@@ -193,10 +196,9 @@ class MainWindow(QMainWindow):
                 print(f"Ошибка при получении данных: {e}")
 
 
-
-def start_gui(mqtt_handler):
+def start_gui():
     app = QApplication(sys.argv)
-    main_window = MainWindow(mqtt_handler)
+    main_window = MainWindow()
     main_window.show()
     sys.exit(app.exec_())
 

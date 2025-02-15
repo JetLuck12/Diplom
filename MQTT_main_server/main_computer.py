@@ -5,7 +5,7 @@ from Handlers.LCardHandler import LCardHandler
 
 class MainComputer:
     """Главный компьютер."""
-    def __init__(self, broker_address: str, port: int, client_id: str = "main_computer"):
+    def __init__(self, broker_address: str, port: int, client_id: str):
         self.broker_address = broker_address
         self.port = port
         self.client_id = client_id
@@ -39,7 +39,7 @@ class MainComputer:
             print("Connected to MQTT broker!")
             # Подписываемся только на каналы data и errors
             for participant in self.handlers:
-                for channel in ["data", "errors", "status"]:
+                for channel in ["data", "errors"]:
                     topic = f"{participant}/{channel}"
                     client.subscribe(topic)
                     print(f"Subscribed to {topic}")

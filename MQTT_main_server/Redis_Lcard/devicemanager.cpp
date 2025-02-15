@@ -52,8 +52,8 @@ void DeviceManager::handle_command(const std::string& command_json, MQTTHandler&
         } else if (command == "get_data") {
             send_data(mqtt);
         } else if (command == "get_data_since") {
-            if (command_data.contains("timestamp")) {
-                int timestamp = command_data.at("timestamp");
+            if (command_data.contains("params")) {
+                int timestamp = command_data["params"][0].get<int>();
                 send_data_since(timestamp, mqtt);
             } else {
                 mqtt.publish("lcard/errors", R"({"error":"Missing timestamp for get_data_since"})");
@@ -124,12 +124,12 @@ void DeviceManager::collect_data() {
 
 void DeviceManager::send_data(MQTTHandler& mqtt) {
     json response;
+    response["data"] = json::array();
 
     if (!data.empty()) {
         // Получаем последний элемент в std::map
         auto last_entry = std::prev(data.end());
-        response["time"] = last_entry->first;
-        response["value"] = last_entry->second;
+        response["data"].push_back({{"time", last_entry->first}, {"value", last_entry->second}});
     } else {
         // Если данных нет, отправляем сообщение об этом
         response["error"] = "No data available";

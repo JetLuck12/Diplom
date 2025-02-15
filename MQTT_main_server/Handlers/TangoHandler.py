@@ -16,8 +16,10 @@ class TangoHandler(IHandler):
         self.last_data = None  # Хранит последние полученные данные
 
         # Подписка на каналы
-        self.mqtt_client.on_message = self.on_message
+        #self.mqtt_client.on_message = self.on_message
         self.mqtt_client.subscribe(self.smc_data_topic)
+        self.mqtt_client.message_callback_add(self.smc_data_topic, self.on_smc_data)
+        self.mqtt_client.message_callback_add(self.smc_errors_topic, self.on_smc_error)
         self.mqtt_client.subscribe(self.smc_errors_topic)
         print(f"[TangoHandler] Subscribed to topics: {self.smc_data_topic}, {self.smc_errors_topic}")
 
@@ -62,7 +64,7 @@ class TangoHandler(IHandler):
         """
         return self.last_data
 
-    def on_message(self, client, userdata, message):
+    def on_smc_data(self, client, userdata, message):
         """
         Обработка входящих сообщений MQTT.
         """
@@ -71,14 +73,24 @@ class TangoHandler(IHandler):
 
         try:
             data = json.loads(payload)
-            if topic == self.smc_data_topic:
-                self.last_data = data
-                print(f"[TangoHandler] Data received: {data}")
-            elif topic == self.smc_errors_topic:
-                self.error_state = data["error"]
-                print(f"[TangoHandler] Error received: {data}")
+            self.last_data = data
+            self.info_tab.error_status.append(f"[TangoHandler] Data received: {data}")
         except json.JSONDecodeError:
-            print(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
+            self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
+
+    def on_smc_error(self, client, userdata, message):
+        """
+        Обработка входящих сообщений MQTT.
+        """
+        topic = message.topic
+        payload = message.payload.decode('utf-8')
+
+        try:
+            data = json.loads(payload)
+            self.error_state = data["error"]
+            self.info_tab.error_status.append(f"[TangoHandler] Error received: {data}")
+        except json.JSONDecodeError:
+            self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
 
 
     def get_available_commands(self):

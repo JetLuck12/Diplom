@@ -9,7 +9,6 @@ class LCardHandler(IHandler):
 
     def __init__(self, name: str, mqtt_client: mqtt.Client):
         super().__init__(name, mqtt_client)
-
         self.command_topic = f"{name}/commands"  # Топик для отправки команд
         self.data_topic = f"{name}/data"        # Топик для получения данных
         self.error_topic = f"{name}/errors"     # Топик для получения ошибок
@@ -17,9 +16,10 @@ class LCardHandler(IHandler):
 
         self.last_data = None                   # Последние полученные данные
         self.error_state = None                 # Последнее состояние ошибок
-
         # Настраиваем подписки на необходимые топики
-        self.mqtt_client.on_message = self.on_message
+        #self.mqtt_client.on_message = self.on_message
+        self.mqtt_client.message_callback_add(self.data_topic, self.on_lcard_data)
+        self.mqtt_client.message_callback_add(self.error_topic, self.on_lcard_error)
         self.mqtt_client.subscribe(self.data_topic)
         self.mqtt_client.subscribe(self.error_topic)
         print(f"[LCardHandler] Subscribed to topics: {self.data_topic}, {self.error_topic}")
@@ -62,7 +62,7 @@ class LCardHandler(IHandler):
         """
         return self.error_state
 
-    def on_message(self, client, userdata, message):
+    def on_lcard_data(self, client, userdata, message):
         """
         Обработка входящих сообщений MQTT.
         """
@@ -71,17 +71,23 @@ class LCardHandler(IHandler):
 
         try:
             data = json.loads(payload)
-            if topic == self.data_topic:
-                self.last_data = data
-                print(f"[LCardHandler] Data received: {data}")
-            elif topic == self.error_topic:
-                self.error_state = data.get("error", None)
-                print(f"[LCardHandler] Error received: {data}")
-            elif topic == self.status_topic:
-                print(f"[LCardHandler] Status received: {data}")
+            self.last_data = data
+            print(f"[LCardHandler] Data received: {data}")
         except json.JSONDecodeError:
             print(f"[LCardHandler] Failed to decode message on topic {topic}: {payload}")
 
+    def on_lcard_error(self, client, userdata, message):
+        """
+        Обработка входящих сообщений MQTT.
+        """
+        topic = message.topic
+        payload = message.payload.decode('utf-8')
+
+        try:
+            data = json.loads(payload)
+            self.info_tab.error_status.append(f"[LCardHandler] Error received: {data}")
+        except json.JSONDecodeError:
+            self.info_tab.error_status.append(f"[LCardHandler] Failed to decode message on topic {topic}: {payload}")
 
     def get_available_commands(self):
         """Возвращает список доступных команд."""

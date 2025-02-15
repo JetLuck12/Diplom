@@ -40,7 +40,6 @@ class MQTTMessage:
     def publish(self, mqtt_client):
         """Публикует сообщение через указанный MQTT клиент."""
         message = self.to_json()
-        print(type(message))
         mqtt_client.publish(self.topic, message)
 
     @staticmethod

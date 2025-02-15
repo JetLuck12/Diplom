@@ -9,6 +9,7 @@ class IHandler:
         self.name = name
         self.mqtt_client = mqtt_client
         self.commands = {}
+        self.info_tab = None
 
     def send_message(self, channel: str, message: dict):
         """Отправка сообщений в канал."""
