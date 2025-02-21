@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 project(Redis_LCard LANGUAGES CXX)
 
 set(CMAKE_PREFIX_PATH "C:/Qt/5.15.2/msvc2019/lib/cmake")

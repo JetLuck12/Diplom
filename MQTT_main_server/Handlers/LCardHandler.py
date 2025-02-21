@@ -2,6 +2,7 @@
 import paho.mqtt.client as mqtt
 import json
 from Handlers.IHandler import IHandler
+import gui_module
 
 
 class LCardHandler(IHandler):
@@ -16,6 +17,9 @@ class LCardHandler(IHandler):
 
         self.last_data = None                   # Последние полученные данные
         self.error_state = None                 # Последнее состояние ошибок
+
+        self.data_tab : gui_module.DataTab = None
+        self.info_tab : gui_module.ControlTab = None
         # Настраиваем подписки на необходимые топики
         #self.mqtt_client.on_message = self.on_message
         self.mqtt_client.message_callback_add(self.data_topic, self.on_lcard_data)
@@ -39,13 +43,14 @@ class LCardHandler(IHandler):
         :param axis: Номер оси (для совместимости с IHandler, не используется в LCard)
         :param args: Дополнительные параметры команды (например, timestamp для get_data_since)
         """
+        if (command == "get_data_since"):
+            self.data_tab.data.clear()
         payload = {"command": command}
         if args:
             payload.update(args)
 
         self.mqtt_client.publish(self.command_topic, json.dumps(payload))
         print(f"[LCardHandler] Sent command to {self.command_topic}: {payload}")
-
     def get_data(self):
         """
         Возвращает последние полученные данные.
@@ -71,8 +76,21 @@ class LCardHandler(IHandler):
 
         try:
             data = json.loads(payload)
-            self.last_data = data
-            print(f"[LCardHandler] Data received: {data}")
+            if data.get("type") == "single":
+                values = data.get("data")
+                timestamp = values[0].get("time")
+                value = values[0].get("value")
+                if timestamp is not None and value is not None:
+                    self.data_tab.update_data(timestamp, value)
+                print(f"[LCardHandler] Single data received: {data}")
+            else:
+                values = data.get("data")
+                print(values)
+                for item in values:
+                    time = item.get("time")
+                    value = item.get("value")
+                    if time is not None and value is not None:
+                        self.data_tab.update_data(time, value)
         except json.JSONDecodeError:
             print(f"[LCardHandler] Failed to decode message on topic {topic}: {payload}")
 

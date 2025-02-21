@@ -30,6 +30,8 @@ class DataTab(QWidget):
     def update_data(self, timestamp, value):
         # Преобразуем timestamp в "час:минута:секунда"
         readable_time = datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
+        if len(self.data) != 0 and self.data[-1][0] == readable_time:
+            return
         self.data.append((readable_time, value))
         self.last_value_label.setText(f"Последнее значение: {value} (время: {readable_time})")
 
@@ -164,7 +166,9 @@ class MainWindow(QMainWindow):
         self.data_tab = DataTab(self.mqtt_handler)
         self.control_tab = ControlTab(self.mqtt_handler)
 
-        for handler in self.mqtt_handler.handlers.values():
+        for (name, handler) in self.mqtt_handler.handlers.items():
+            if (name == "lcard"):
+                handler.data_tab = self.data_tab
             handler.info_tab = self.control_tab
 
         self.tabs.addTab(self.data_tab, "Данные")
