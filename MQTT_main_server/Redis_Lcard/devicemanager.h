@@ -21,8 +21,8 @@ inline std::unique_ptr<DeviceInterface> create_device(bool test_flag) {
 
 class DeviceManager {
 public:
-    explicit DeviceManager(bool test_flag)
-        : device(create_device(test_flag)), running(false) {}
+    explicit DeviceManager(bool test_flag, MQTTHandler& mqtt_)
+        : device(create_device(test_flag)), running(false), mqtt(mqtt_) {}
 
     bool init();
 
@@ -30,9 +30,9 @@ public:
 
     void stop();
 
-    void handle_command(const std::string& command, MQTTHandler& mqtt);
+    void handle_command(const std::string& command);
 
-    void collect_data(const std::string& since, MQTTHandler& mqtt);
+    void collect_data(const std::string& since);
 
     void measure_and_store(); // Новый метод для фонового сбора данных
 
@@ -43,7 +43,9 @@ private:
     std::map<int, float> data; // Map to store time:value pairs
     std::mutex data_mutex; // Для синхронизации доступа к данным
     void collect_data();
-    void send_data(MQTTHandler& mqtt);
-    void send_data_since(int timestamp, MQTTHandler& mqtt);
+    void send_data();
+    void send_data_since(int start_timestamp, int end_timestamp);
     void enforce_data_limit(); // Метод для удаления старых данных
+    bool continuous;
+    MQTTHandler& mqtt;
 };

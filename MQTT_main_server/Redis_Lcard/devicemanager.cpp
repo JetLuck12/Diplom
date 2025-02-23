@@ -36,7 +36,7 @@ void DeviceManager::stop() {
     }
 }
 
-void DeviceManager::handle_command(const std::string& command_json, MQTTHandler& mqtt) {
+void DeviceManager::handle_command(const std::string& command_json) {
     try {
         // Разбираем JSON-команду
         auto command_data = json::parse(command_json);
@@ -48,13 +48,21 @@ void DeviceManager::handle_command(const std::string& command_json, MQTTHandler&
             mqtt.publish("lcard/status", R"({"status":"started"})");
         } else if (command == "stop") {
             stop();
+            continuous = false;
             mqtt.publish("lcard/status", R"({"status":"stopped"})");
-        } else if (command == "get_data") {
-            send_data(mqtt);
+        } else if (command == "get_current_data") {
+            continuous = false;
+            send_data();
+        } else if (command == "get_continuous_data") {
+            continuous = true;
         } else if (command == "get_data_since") {
+            continuous = false;
             if (command_data.contains("params")) {
-                int timestamp = std::stoi(command_data.at("params")[0].get<std::string>());
-                send_data_since(timestamp, mqtt);
+                std::string start_str = command_data.at("params")[0].get<std::string>();
+                std::string end_str = command_data.at("params")[1].get<std::string>();
+                int start_timestamp = start_str == "" ? 0 : std::stoi(start_str);
+                int end_timestamp = end_str == "" ? 0 : std::stoi(end_str);
+                send_data_since(start_timestamp,end_timestamp);
             } else {
                 mqtt.publish("lcard/errors", R"({"error":"Missing timestamp for get_data_since"})");
             }
@@ -66,7 +74,7 @@ void DeviceManager::handle_command(const std::string& command_json, MQTTHandler&
     }
 }
 
-void DeviceManager::collect_data(const std::string& since, MQTTHandler& mqtt) {
+void DeviceManager::collect_data(const std::string& since) {
     std::ostringstream message;
     std::time_t since_timestamp = 0;
 
@@ -107,6 +115,9 @@ void DeviceManager::measure_and_store() {
     std::lock_guard<std::mutex> lock(data_mutex);
     data[timestamp] = value;
     std::cout << "Data collected: " << timestamp << " -> " << value << std::endl;
+    if (continuous){
+        send_data();
+    }
 }
 
 void DeviceManager::collect_data() {
@@ -122,7 +133,7 @@ void DeviceManager::collect_data() {
     }
 }
 
-void DeviceManager::send_data(MQTTHandler& mqtt) {
+void DeviceManager::send_data() {
     json response;
     response["type"] = "single";
     response["data"] = json::array();
@@ -135,20 +146,18 @@ void DeviceManager::send_data(MQTTHandler& mqtt) {
         // Если данных нет, отправляем сообщение об этом
         response["error"] = "No data available";
     }
-    std::cout << "Published data" << response << '\n';
     mqtt.publish("lcard/data", response.dump());
 }
 
-void DeviceManager::send_data_since(int timestamp, MQTTHandler& mqtt) {
+void DeviceManager::send_data_since(int start_timestamp,int end_timestamp) {
     json response;
     response["type"] = "list";
     response["data"] = json::array();
     for (const auto& [time, value] : data) {
-        if (time >= timestamp) {
+        if (time >= start_timestamp && (end_timestamp == 0 || time <= end_timestamp)) {
             response["data"].push_back({{"time", time}, {"value", value}});
         }
     }
-    std::cout << response;
     mqtt.publish("lcard/data", response.dump());
 }
 

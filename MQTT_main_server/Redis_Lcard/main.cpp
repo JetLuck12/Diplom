@@ -7,7 +7,7 @@ void on_message(struct mosquitto*, void* obj, const struct mosquitto_message* me
         auto* manager = static_cast<DeviceManager*>(obj);
         std::string command(static_cast<char*>(message->payload), message->payloadlen);
         MQTTHandler mqtt("localhost", 1883);
-        manager->handle_command(command, mqtt);
+        manager->handle_command(command);
     }
 }
 
@@ -19,12 +19,12 @@ int main() {
             return 1;
         }
 
-        DeviceManager manager(true);
+        DeviceManager manager(true, mqtt);
         manager.init();
 
         // Подписка на топик с командами
         mqtt.subscribe("lcard/commands", [&manager, &mqtt](const std::string& message) {
-            manager.handle_command(message, mqtt);
+            manager.handle_command(message);
         });
 
         std::cout << "DeviceManager is running. Waiting for commands..." << std::endl;

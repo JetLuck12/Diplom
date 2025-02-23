@@ -20,6 +20,7 @@ class LCardHandler(IHandler):
 
         self.data_tab : gui_module.DataTab = None
         self.info_tab : gui_module.ControlTab = None
+
         # Настраиваем подписки на необходимые топики
         #self.mqtt_client.on_message = self.on_message
         self.mqtt_client.message_callback_add(self.data_topic, self.on_lcard_data)
@@ -31,8 +32,9 @@ class LCardHandler(IHandler):
         self.commands = {
                     "start": {"params": [], "description": "Start measurement"},
                     "stop": {"params": [], "description": "Stop measurement"},
-                    "get_data": {"params": [], "description": "Get data"},
-                    "get_data_since": {"params": ["timestamp"], "description": "Get data since timestamp"},
+                    "get_current_data": {"params": [], "description": "Get current data"},
+                    "get_data_since": {"params": ["start_timestamp", "end_timestamp"], "description": "Get data since timestamp"},
+                    "get_continuous_data" : {"params": [], "description":"get data in real time"}
                 }
 
     def send_command(self, command: str, axis: int = 0, args: dict = None):
@@ -84,6 +86,7 @@ class LCardHandler(IHandler):
                     self.data_tab.update_data(timestamp, value)
                 print(f"[LCardHandler] Single data received: {data}")
             else:
+                self.data_tab.data.clear()
                 values = data.get("data")
                 print(values)
                 for item in values:
