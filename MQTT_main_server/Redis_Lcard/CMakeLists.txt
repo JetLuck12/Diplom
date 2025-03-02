@@ -3,27 +3,44 @@ set(CMAKE_CXX_STANDARD 20)
 project(Redis_LCard LANGUAGES CXX)
 
 set(CMAKE_PREFIX_PATH "C:/Qt/5.15.2/msvc2019/lib/cmake")
-set(LCARD_DIR "C:/Qt/Labs/Diplom/MQTT_main_server/Redis_LCard/Lcard_packs")
+set(LCARD_DIR "${CMAKE_SOURCE_DIR}/Lcard_packs")
 set(MOSQUITTO_DIR "C:/Program Files/mosquitto/devel")
+set(INCLUDE_DIRS
+    "MockLcardLib"
+    "DeviceInterface"
+    "RealLcardLib"
+    "MQTTHandler"
+    "DeviceManager"
+    "Utils"
+    "Utils/CmdMessage"
+    "Utils/RespMessage"
+    "Utils/Response"
+    "${LCARD_DIR}/include"
+    "${MOSQUITTO_DIR}/include"
+)
+
 
 add_executable(Redis_LCard main.cpp
-    MockDevice.cpp MockDevice.h
-    DeviceInterface.h
-    LcardDevice.cpp LcardDevice.h
-    mqtthandler.h mqtthandler.cpp
-    devicemanager.h devicemanager.cpp
-    json.hpp
-    MQTTMessage.h
-    MQTTMessage.cpp)
+    MockLcardLib/MockDevice.cpp         MockLcardLib/MockDevice.h
+    DeviceInterface/DeviceInterface.h
+    RealLcardLib/LcardDevice.cpp        RealLcardLib/LcardDevice.h
+    MQTTHandler/mqtthandler.h           MQTTHandler/mqtthandler.cpp
+    DeviceManager/devicemanager.h       DeviceManager/devicemanager.cpp
+    Utils/json.hpp
+    Utils/MQTTMessage.h                 Utils/MQTTMessage.cpp
+    Utils/Response/IResponse.h
+    Utils/Response/dataresponse.h
+    Utils/Response/statusresponse.h
+    Utils/RespMessage/mqttrespmessage.cpp Utils/RespMessage/mqttrespmessage.h
+    Utils/CmdMessage/mqttcmdmessage.cpp Utils/CmdMessage/mqttcmdmessage.h
+
+)
+
+target_include_directories(Redis_LCard PRIVATE ${INCLUDE_DIRS})
 
 # Укажите путь к заголовочным файлам
 include_directories(${LCARD_DIR}/include)
 include_directories(${MOSQUITTO_DIR})
-
-
-# Укажите путь к файлам библиотеки
-link_directories(${LCARD_DIR}/lib/msvc)
-link_directories(${MOSQUITTO_DIR})
 
 target_link_libraries(Redis_LCard
     "${LCARD_DIR}/lib/msvc64/ltrapi.lib"

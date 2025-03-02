@@ -10,18 +10,24 @@ class TangoHandler(IHandler):
     def __init__(self, name: str, mqtt_client: mqtt.Client):
         super().__init__(name, mqtt_client)
         self.smc_command_topic = f"{name}/commands"
+        self.smc_inner_data_topic = f"{name}/inner_data"
         self.smc_data_topic = f"{name}/data"
         self.smc_errors_topic = f"{name}/errors"
         self.error_state = "Stable"  # Хранит текущее состояние ошибки
         self.last_data = None  # Хранит последние полученные данные
+        self.inner_data_flag = False
+        self.inner_data : json
 
         # Подписка на каналы
         #self.mqtt_client.on_message = self.on_message
         self.mqtt_client.subscribe(self.smc_data_topic)
         self.mqtt_client.message_callback_add(self.smc_data_topic, self.on_smc_data)
         self.mqtt_client.message_callback_add(self.smc_errors_topic, self.on_smc_error)
+        self.mqtt_client.message_callback_add(self.smc_inner_data_topic, self.on_smc_inner_data)
         self.mqtt_client.subscribe(self.smc_errors_topic)
         print(f"[TangoHandler] Subscribed to topics: {self.smc_data_topic}, {self.smc_errors_topic}")
+
+        self.axes = []
 
         self.commands = {
                     "move": {"params": ["axis", "position"], "description": "Move to position"},
@@ -45,6 +51,8 @@ class TangoHandler(IHandler):
             "axis": axis,
             "params": args
         }
+        if command == "add" and not axis in self.axes:
+            self.axes.append(axis)
         self.mqtt_client.publish(self.smc_command_topic, json.dumps(payload))
         print(f"[TangoHandler] Sent command to {self.smc_command_topic}: {payload}")
 
@@ -78,6 +86,20 @@ class TangoHandler(IHandler):
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
 
+    def on_smc_inner_data(self, client, userdata, message):
+        """
+        Обработка входящих сообщений MQTT.
+        """
+        topic = message.topic
+        payload = message.payload.decode('utf-8')
+
+        try:
+            data = json.loads(payload)
+            self.inner_data = data
+            self.inner_data_flag = True
+        except json.JSONDecodeError:
+            self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
+
     def on_smc_error(self, client, userdata, message):
         """
         Обработка входящих сообщений MQTT.
@@ -99,4 +121,13 @@ class TangoHandler(IHandler):
 
     def get_commands_details(self, command):
         return self.commands[command]
+
+    def get_axis_pos(self, axis : int):
+        self.inner_data_flag = False
+        self.send_command("get_position", axis, [])
+        while (not self.inner_data_flag):
+            pass
+        self.inner_data_flag = False
+        return self.inner_data
+
 

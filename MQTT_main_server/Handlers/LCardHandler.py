@@ -74,24 +74,20 @@ class LCardHandler(IHandler):
         Обработка входящих сообщений MQTT.
         """
         topic = message.topic
-        payload = message.payload.decode('utf-8')
-
+        payload = message.payload.decode('utf-8')s
         try:
-            data = json.loads(payload)
+            response = json.loads(payload)
+            data = json.loads(response.get("response"))
             if data.get("type") == "single":
                 values = data.get("data")
-                timestamp = values[0].get("time")
-                value = values[0].get("value")
+                timestamp, value = list(values.items())[0]
                 if timestamp is not None and value is not None:
-                    self.data_tab.update_data(timestamp, value)
+                    self.data_tab.update_data(int(timestamp), value)
                 print(f"[LCardHandler] Single data received: {data}")
             else:
                 self.data_tab.data.clear()
-                values = data.get("data")
-                print(values)
-                for item in values:
-                    time = item.get("time")
-                    value = item.get("value")
+                values : dict = data.get("data")
+                for time, value in list(values.items()):
                     if time is not None and value is not None:
                         self.data_tab.update_data(time, value)
         except json.JSONDecodeError:

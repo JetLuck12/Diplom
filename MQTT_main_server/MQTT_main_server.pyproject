@@ -17,6 +17,8 @@
         "Utils/MQTTMessage.py",
         "Handlers/__init__.py",
         "Utils/__init__.py",
-        "main_computer.py"
+        "main_computer.py",
+        "Calibrator/Calibrator.py",
+        "Calibrator/__init__.py"
     ]
 }
