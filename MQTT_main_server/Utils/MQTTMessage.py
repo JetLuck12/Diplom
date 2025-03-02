@@ -20,7 +20,7 @@ class MQTTMessage:
         self.command = command
         self.params = params or {}
         self.device = device
-        self.server_timestamp = server_timestamp or time.time()
+        self.server_timestamp = server_timestamp or str(time.time())
         self.client_response = client_response
         self.server_received_timestamp = server_received_timestamp
 
@@ -36,11 +36,6 @@ class MQTTMessage:
         }
         message = json.dumps(message)
         return message
-
-    def publish(self, mqtt_client):
-        """Публикует сообщение через указанный MQTT клиент."""
-        message = self.to_json()
-        mqtt_client.publish(self.topic, message)
 
     @staticmethod
     def from_json(json_data):
