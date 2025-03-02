@@ -1,7 +1,7 @@
 #include "LcardDevice.h"
 #include <iostream>
-#include "Lcard_packs/include/ltrapi.h"
-#include "Lcard_packs/include/ltr114api.h"
+#include "ltrapi.h"
+#include "ltr114api.h"
 
 
 #define SIZE 1

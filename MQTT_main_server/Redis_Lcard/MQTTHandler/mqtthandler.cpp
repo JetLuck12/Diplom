@@ -5,7 +5,7 @@
 #include "mqtthandler.h"
 
 MQTTHandler::MQTTHandler(const std::string& broker_address, int port)
-    : broker_address(broker_address), port(port), mosq(nullptr) {
+    : mosq(nullptr), broker_address(broker_address), port(port) {
     mosquitto_lib_init();
     mosq = mosquitto_new(nullptr, true, this);
     if (!mosq) {
@@ -35,8 +35,10 @@ void MQTTHandler::disconnect() {
     }
 }
 
-bool MQTTHandler::publish(const std::string& topic, const std::string& message) {
-    int ret = mosquitto_publish(mosq, nullptr, topic.c_str(), message.size(), message.c_str(), 1, false);
+bool MQTTHandler::publish(const std::string& topic, const MQTTMessage& message) {
+    json jsonMessage = message.toJSON();
+    std::string str_msg = jsonMessage.dump();
+    int ret = mosquitto_publish(mosq, nullptr, topic.c_str(), str_msg.size(), str_msg.c_str(), 1, false);
     return ret == MOSQ_ERR_SUCCESS;
 }
 

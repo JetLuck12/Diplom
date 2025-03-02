@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DeviceInterface.h"
-#include "Lcard_packs/include/ltr114api.h"
+#include "ltr114api.h"
 #include <memory>
 
 PTLTR114 init_photodiod();

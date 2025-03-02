@@ -1,4 +1,5 @@
 #pragma once
+#include "MQTTMessage.h"
 #include <mosquitto.h>
 #include <string>
 #include <functional>
@@ -12,7 +13,7 @@ public:
     bool connect();
     void disconnect();
 
-    bool publish(const std::string& topic, const std::string& message);
+    bool publish(const std::string& topic, const MQTTMessage& message);
     void subscribe(const std::string& topic, std::function<void(const std::string&)> callback);
 
     struct mosquitto* get_mosq() const;
