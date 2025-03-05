@@ -33,6 +33,7 @@ add_executable(Redis_LCard main.cpp
     Utils/Response/statusresponse.h
     Utils/RespMessage/mqttrespmessage.cpp Utils/RespMessage/mqttrespmessage.h
     Utils/CmdMessage/mqttcmdmessage.cpp Utils/CmdMessage/mqttcmdmessage.h
+    DeviceManager/devicemanager.cpp
 
 
 )
