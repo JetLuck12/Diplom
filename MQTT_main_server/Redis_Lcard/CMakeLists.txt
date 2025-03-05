@@ -25,7 +25,7 @@ add_executable(Redis_LCard main.cpp
     DeviceInterface/DeviceInterface.h
     RealLcardLib/LcardDevice.cpp        RealLcardLib/LcardDevice.h
     MQTTHandler/mqtthandler.h           MQTTHandler/mqtthandler.cpp
-    DeviceManager/devicemanager.h
+    DeviceManager/devicemanager.h       DeviceManager/devicemanager.cpp
     Utils/json.hpp
     Utils/MQTTMessage.h                 Utils/MQTTMessage.cpp
     Utils/Response/IResponse.h
@@ -33,6 +33,7 @@ add_executable(Redis_LCard main.cpp
     Utils/Response/statusresponse.h
     Utils/RespMessage/mqttrespmessage.cpp Utils/RespMessage/mqttrespmessage.h
     Utils/CmdMessage/mqttcmdmessage.cpp Utils/CmdMessage/mqttcmdmessage.h
+
 
 )
 
