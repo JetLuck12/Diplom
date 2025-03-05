@@ -74,7 +74,7 @@ class LCardHandler(IHandler):
         Обработка входящих сообщений MQTT.
         """
         topic = message.topic
-        payload = message.payload.decode('utf-8')s
+        payload = message.payload.decode('utf-8')
         try:
             response = json.loads(payload)
             data = json.loads(response.get("response"))

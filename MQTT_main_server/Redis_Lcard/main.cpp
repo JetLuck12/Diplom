@@ -27,13 +27,13 @@ void on_message(struct mosquitto*, void* obj, const struct mosquitto_message* me
 
 int main() {
     try {
-        MQTTHandler mqtt("localhost", 1883);
+        MQTTHandler mqtt("192.168.98.20", 1883);
         if (!mqtt.connect()) {
             std::cerr << "Failed to connect to MQTT broker." << std::endl;
             return 1;
         }
 
-        DeviceManager manager(true, mqtt);
+        DeviceManager manager(false, mqtt);
         manager.init();
 
         // Подписка на топик с командами

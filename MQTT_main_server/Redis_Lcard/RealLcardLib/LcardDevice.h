@@ -4,17 +4,20 @@
 #include "ltr114api.h"
 #include <memory>
 
-PTLTR114 init_photodiod();
+void init_photodiod(TLTR114* pltr);
 float get_ltr_data(TLTR114* ltr);
 
 std::unique_ptr<DeviceInterface> create_real_device();
 
 class LcardDevice : public DeviceInterface {
 private:
-    PTLTR114 ltr; // Указатель на реальное устройство
+    TLTR114* ltr; // Указатель на реальное устройство
 
 public:
     LcardDevice();
+    ~LcardDevice(){
+        delete ltr;
+    }
 
     // Инициализация устройства
     bool init() override;

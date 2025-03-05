@@ -31,9 +31,13 @@ class DataTab(QWidget):
 
     def update_data(self, timestamp, value):
         # Преобразуем timestamp в "час:минута:секунда"
-        readable_time = datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
+        #readable_time = datetime.fromtimestamp(timestamp).strftime("%M:%S.%f")
+        readable_time = timestamp % 10000
         if len(self.data) != 0 and self.data[-1][0] == readable_time:
+            print(f"cal: {self.data[-1]}")
             return
+        if len(self.data) > 100:
+            self.data.pop(0)
         self.data.append((readable_time, value))
         self.last_value_label.setText(f"Последнее значение: {value} (время: {readable_time})")
 

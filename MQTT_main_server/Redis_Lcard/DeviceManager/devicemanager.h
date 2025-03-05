@@ -42,7 +42,7 @@ private:
     static constexpr size_t MAX_DATA_SIZE = 100;
     std::unique_ptr<DeviceInterface> device;
     bool running;
-    std::map<int, float> data;
+    std::map<unsigned long long, float> data;
     std::mutex data_mutex;
     void collect_data();
     void send_data();
