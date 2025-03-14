@@ -37,12 +37,6 @@ class MainComputer:
         """Обработчик подключения."""
         if rc == 0:
             print("Connected to MQTT broker!")
-            # Подписываемся только на каналы data и errors
-            for participant in self.handlers:
-                for channel in ["data", "errors"]:
-                    topic = f"{participant}/{channel}"
-                    client.subscribe(topic)
-                    print(f"Subscribed to {topic}")
         else:
             print(f"Connection failed with code {rc}")
 

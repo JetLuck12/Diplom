@@ -1,14 +1,13 @@
 from main_computer import MainComputer
+import json
 
 class Calibrator:
-    def __init__(self, main_computer : MainComputer, diod_axis : int):
+    def __init__(self, main_computer : MainComputer, diod_axis : int = -1):
         """
         Инициализация калибровщика.
 
-        :param tango_handler: Экземпляр TangoHandler для управления моторами
-        :param motor_axes: Список осей моторов (list[int])
-        :param photodiode_axis: Ось фотодиода (int)
-        :param lcard_handler: Экземпляр LcardHandler для работы с фотодиодом
+        :param main_computer: Ссылка на центральный клиент
+        :param diod_axis: Ось фотодиода
         """
         self.main = main_computer
         self.diod_axis = diod_axis
@@ -36,9 +35,10 @@ class Calibrator:
                 config["SMC"]["Knives"].append({"Axis": axis, "Pos": response})
 
         # Опрос фотодиода
-        response = self.send_command("pos", self.photodiode_axis, {})
-        if response is not None:
-            config["SMC"]["Photodiod"].append({"Axis": self.photodiode_axis, "Pos": response})
+        if self.diod_axis != -1:
+            response = self.main.handlers["smc"].get_axis_pos(self.diod_axis)
+            if response is not None:
+                config["SMC"]["Photodiod"].append({"Axis": self.diod_axis, "Pos": response})
 
         # Запись в файл
         with open(file_path, "w", encoding="utf-8") as file:

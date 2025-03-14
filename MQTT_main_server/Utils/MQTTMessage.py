@@ -27,6 +27,7 @@ class MQTTMessage:
     def to_json(self):
         """Возвращает сообщение в формате JSON."""
         message = {
+            "topic": self.topic,
             "command": self.command,
             "params": self.params,
             "device": self.device,

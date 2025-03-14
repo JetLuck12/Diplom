@@ -31,6 +31,8 @@ class SMCControllerMQTTBridge:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 
+        self.topics = ["smc/commands", "smc/inner_commands"]
+
     def connect(self):
         """Подключение к MQTT брокеру."""
         self.client.connect(self.mqtt_broker, self.mqtt_port)
@@ -48,9 +50,9 @@ class SMCControllerMQTTBridge:
         if rc == 0:
             print("Connected to MQTT broker successfully.")
             # Подписываемся на команды
-            command_topic = f"{self.mqtt_topic_prefix}/commands"
-            client.subscribe(command_topic)
-            print(f"Subscribed to topic: {command_topic}")
+            for topic in self.topics:
+                client.subscribe(topic)
+                print(f"Subscribed to topic: {topic}")
         else:
             print(f"Failed to connect, return code {rc}")
 
@@ -67,21 +69,22 @@ class SMCControllerMQTTBridge:
 
         except json.JSONDecodeError as e:
             print(f"Ошибка парсинга JSON: {e}")
-        message = MQTTMessage.from_json(message_str)
 
+        msg = MQTTMessage.from_json(message_str)
+        print(msg)
 
-        if topic != "smc/commands":
+        if topic != "smc/commands" and topic != "smc/inner_commands":
             raise Exception(f"bad topic: {topic}")
         try:
             print(f"Received message on topic {topic}: {message.__str__()}")
-            self.handle_command(message)
+            self.handle_command(topic, msg)
         except json.JSONDecodeError:
             self.publish_error("Invalid JSON format", topic)
 
-    def handle_command(self, message):
+    def handle_command(self, topic : str, message : MQTTMessage):
         """Обработка команд от MQTT."""
-        command = str(message.command)
-        axis = str(message.params[0])
+        command = message.command
+        axis = message.params[0]
         params = message.params[1:]
 
         try:
@@ -89,13 +92,13 @@ class SMCControllerMQTTBridge:
                 position = float(params[0])
                 if axis is not None and position is not None:
                     self.smc_controller.StartOne(axis, position)
-                    self.publish_data(axis, {"status": "Moving", "position": position})
+                    self.publish_data(topic, axis, {"status": "Moving", "position": position})
                 else:
                     raise ValueError("Missing axis or position parameter")
             elif command == "stop":
                 if axis is not None:
                     self.smc_controller.StopOne(axis)
-                    self.publish_data(axis, {"status": "Stopped"})
+                    self.publish_data(topic, axis, {"status": "Stopped"})
                 else:
                     raise ValueError("Missing axis parameter")
             elif command == "add":
@@ -111,13 +114,13 @@ class SMCControllerMQTTBridge:
             elif command == "get_state":
                 if axis is not None:
                     _, status = self.smc_controller.StateOne(axis)
-                    self.publish_data(axis, {"status": status})
+                    self.publish_data(topic, axis, {"status": status})
                 else:
                     raise ValueError("Missing axis parameter")
             elif command == "get_position":
                 if axis is not None:
                     position = self.smc_controller.ReadOne(axis)
-                    self.publish_data(axis, {"position": position})
+                    self.publish_data(topic, axis, {"position": position})
                 else:
                     raise ValueError("Missing axis parameter")
             else:
@@ -125,9 +128,12 @@ class SMCControllerMQTTBridge:
         except Exception as e:
             self.publish_error(str(e), f"Command: {command}")
 
-    def publish_data(self, axis, data):
+    def publish_data(self, topic : str, axis, data):
         """Публикация данных в канал `smc/data`."""
-        topic = "smc/data"
+        if (topic == "smc/commands"):
+            topic = "smc/data"
+        else:
+            topic = "smc/inner_data"
         message = {"axis": axis, "data": data}
         self.client.publish(topic, json.dumps(message))
         print(f"Published data to {topic}: {message}")
@@ -141,7 +147,6 @@ class SMCControllerMQTTBridge:
 
 
 def main():
-
     # Выбор контроллера (Mock или реальный)
     print("Starting SMC Controller MQTT Bridge...")
     test_mode = True  # True для использования MockSMCMotorHW

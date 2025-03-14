@@ -6,11 +6,11 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QLabel, QPushButton, QComboBox, QLineEdit, QTextEdit, QHBoxLayout, QFormLayout,
     QFileDialog
 )
-from PyQt5.QtCore import QTimer
 from datetime import datetime
 from Utils.MQTTMessage import MQTTMessage
 from main_computer import MainComputer
 from Calibrator.Calibrator import Calibrator
+from PyQt5.QtCore import QTimer
 
 
 class DataTab(QWidget):
@@ -28,6 +28,8 @@ class DataTab(QWidget):
         layout.addWidget(self.graph_widget)
 
         self.setLayout(layout)
+
+        self.timer = QTimer()
 
     def update_data(self, timestamp, value):
         # Преобразуем timestamp в "час:минута:секунда"
@@ -145,6 +147,7 @@ class ControlTab(QWidget):
     def send_command(self):
         """Отправляет команду через MQTT."""
         device = self.device_selector.currentText()
+        handler = self.mqtt_client.get_handler(device)
         command = self.command_selector.currentText().split(" ")[0]
         params = [field.text() for field in self.argument_fields]
         topic = f"{device}/commands"
@@ -153,8 +156,9 @@ class ControlTab(QWidget):
                     params=params,
                     device=device)
 
-        self.mqtt_client.client.publish(topic, payload.to_json())
-        self.error_status.append(f"Отправлено: {payload.__str__()}")
+        handler.send_command(payload)
+        #self.mqtt_client.client.publish(topic, payload.to_json())
+        #self.error_status.append(f"Отправлено: {payload.__str__()}")
 
 
 
@@ -224,12 +228,15 @@ class MainWindow(QMainWindow):
         self.data_tab = DataTab(self.mqtt_handler)
         self.control_tab = ControlTab(self.mqtt_handler)
 
+        if "lcard" in self.mqtt_handler.handlers.keys():
+            self.data_tab.timer.timeout.connect(self.mqtt_handler.handlers["lcard"].fetch_data)
+
         for (name, handler) in self.mqtt_handler.handlers.items():
             if (name == "lcard"):
                 handler.data_tab = self.data_tab
             handler.info_tab = self.control_tab
 
-        self.calibrator = Calibrator(self.mqtt_handler, 0)
+        self.calibrator = Calibrator(self.mqtt_handler, -1)
         self.calibrator_tab = CalibrationTab(self.calibrator)
 
         self.tabs.addTab(self.data_tab, "Данные")
@@ -238,28 +245,9 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.tabs)
 
-        # Таймер для обновления данных
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.fetch_data)
-        self.timer.start(100)
-
     def closeEvent(self, event):
         self.mqtt_handler.disconnect()
         event.accept()
-
-    def fetch_data(self):
-        """Запрашивает данные у обработчика и обновляет интерфейс."""
-        if "lcard" in self.mqtt_handler.handlers.keys():
-            try:
-                # Запрос последних данных у обработчика
-                last_data = self.mqtt_handler.get_handler("lcard").get_data()
-                if last_data:
-                    timestamp = last_data.get("time")
-                    value = last_data.get("value")
-                    if timestamp is not None and value is not None:
-                        self.data_tab.update_data(timestamp, value)
-            except Exception as e:
-                print(f"Ошибка при получении данных: {e}")
 
 
 def start_gui():
