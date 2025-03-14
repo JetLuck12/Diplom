@@ -36,8 +36,7 @@ void MQTTHandler::disconnect() {
 }
 
 bool MQTTHandler::publish(const std::string& topic, const MQTTMessage& message) {
-    json jsonMessage = message.toJSON();
-    std::string str_msg = jsonMessage.dump();
+    std::string str_msg = message.toJSON().dump();
     int ret = mosquitto_publish(mosq, nullptr, topic.c_str(), str_msg.size(), str_msg.c_str(), 1, false);
     return ret == MOSQ_ERR_SUCCESS;
 }

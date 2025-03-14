@@ -3,6 +3,8 @@ from Handlers.IHandler import IHandler
 from Utils.MQTTMessage import MQTTMessage
 import paho.mqtt.client as mqtt
 import json
+import time
+import Utils.Multithread_data as mt_data
 
 
 class TangoHandler(IHandler):
@@ -10,21 +12,23 @@ class TangoHandler(IHandler):
     def __init__(self, name: str, mqtt_client: mqtt.Client):
         super().__init__(name, mqtt_client)
         self.smc_command_topic = f"{name}/commands"
+        self.smc_inner_command_topic = f"{name}/inner_commands"
         self.smc_inner_data_topic = f"{name}/inner_data"
         self.smc_data_topic = f"{name}/data"
         self.smc_errors_topic = f"{name}/errors"
         self.error_state = "Stable"  # Хранит текущее состояние ошибки
         self.last_data = None  # Хранит последние полученные данные
-        self.inner_data_flag = False
-        self.inner_data : json
+        self.inner_data  = mt_data.Shared_data(json.dumps({}))
 
         # Подписка на каналы
         #self.mqtt_client.on_message = self.on_message
         self.mqtt_client.subscribe(self.smc_data_topic)
+        self.mqtt_client.subscribe(self.smc_inner_data_topic)
+        self.mqtt_client.subscribe(self.smc_errors_topic)
         self.mqtt_client.message_callback_add(self.smc_data_topic, self.on_smc_data)
         self.mqtt_client.message_callback_add(self.smc_errors_topic, self.on_smc_error)
         self.mqtt_client.message_callback_add(self.smc_inner_data_topic, self.on_smc_inner_data)
-        self.mqtt_client.subscribe(self.smc_errors_topic)
+
         print(f"[TangoHandler] Subscribed to topics: {self.smc_data_topic}, {self.smc_errors_topic}")
 
         self.axes = []
@@ -38,23 +42,18 @@ class TangoHandler(IHandler):
                     "get_position": {"params": ["axis"], "description": "Get the position of the axis"},
                 }
 
-    def send_command(self, command: str, axis: int, args: dict):
+    def send_command(self, msg : MQTTMessage):
         """
         Отправляет команду в MQTT для SMCControllerMQTTBridge.
 
-        :param command: Название команды
-        :param axis: Ось для команды
-        :param args: Аргументы команды
+        :param msg: Сообщение, завернутое в MQTTMessage
         """
-        payload = {
-            "command": command,
-            "axis": axis,
-            "params": args
-        }
-        if command == "add" and not axis in self.axes:
+        axis = msg.params[0]
+        cmd = msg.command
+        if cmd == "add" and not axis in self.axes:
             self.axes.append(axis)
-        self.mqtt_client.publish(self.smc_command_topic, json.dumps(payload))
-        print(f"[TangoHandler] Sent command to {self.smc_command_topic}: {payload}")
+        self.mqtt_client.publish(msg.topic, msg.to_json())
+        print(f"[TangoHandler] Sent command to {msg.topic}: {msg}")
 
     def is_error(self):
         """
@@ -92,11 +91,9 @@ class TangoHandler(IHandler):
         """
         topic = message.topic
         payload = message.payload.decode('utf-8')
-
         try:
-            data = json.loads(payload)
-            self.inner_data = data
-            self.inner_data_flag = True
+            self.inner_data.write_value(json.loads(payload))
+            print("Received inner data: {data}")
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
 
@@ -123,11 +120,10 @@ class TangoHandler(IHandler):
         return self.commands[command]
 
     def get_axis_pos(self, axis : int):
-        self.inner_data_flag = False
-        self.send_command("get_position", axis, [])
-        while (not self.inner_data_flag):
-            pass
-        self.inner_data_flag = False
-        return self.inner_data
+        msg = MQTTMessage("smc/inner_commands", "get_position", [axis], "smc")
+        print(f"Message sent : {msg}")
+        self.send_command(msg)
+        data = self.inner_data.read_value()
+        return data
 
 

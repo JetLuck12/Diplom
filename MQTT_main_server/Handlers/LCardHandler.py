@@ -3,6 +3,7 @@ import paho.mqtt.client as mqtt
 import json
 from Handlers.IHandler import IHandler
 import gui_module
+from Utils.MQTTMessage import MQTTMessage
 
 
 class LCardHandler(IHandler):
@@ -37,7 +38,8 @@ class LCardHandler(IHandler):
                     "get_continuous_data" : {"params": [], "description":"get data in real time"}
                 }
 
-    def send_command(self, command: str, axis: int = 0, args: dict = None):
+
+    def send_command(self, msg : MQTTMessage):
         """
         Отправляет команду в MQTT для LCard.
 
@@ -45,14 +47,16 @@ class LCardHandler(IHandler):
         :param axis: Номер оси (для совместимости с IHandler, не используется в LCard)
         :param args: Дополнительные параметры команды (например, timestamp для get_data_since)
         """
-        if (command == "get_data_since"):
+        if (msg.command == "get_data_since"):
             self.data_tab.data.clear()
-        payload = {"command": command}
-        if args:
-            payload.update(args)
+        elif msg.command == "start":
+            self.data_tab.timer.start(100)
+        elif msg.command == "stop":
+            self.data_tab.timer.stop()
 
-        self.mqtt_client.publish(self.command_topic, json.dumps(payload))
-        print(f"[LCardHandler] Sent command to {self.command_topic}: {payload}")
+        self.mqtt_client.publish(msg.topic, msg.to_json())
+        self.info_tab.error_status.append(f"[LCardHandler] Sent command to {msg.command}: {msg}")
+        print(f"[LCardHandler] Sent command to {self.command_topic}: {msg}")
     def get_data(self):
         """
         Возвращает последние полученные данные.
@@ -73,6 +77,7 @@ class LCardHandler(IHandler):
         """
         Обработка входящих сообщений MQTT.
         """
+        print(message)
         topic = message.topic
         payload = message.payload.decode('utf-8')
         try:
@@ -112,3 +117,16 @@ class LCardHandler(IHandler):
 
     def get_commands_details(self, command):
         return self.commands[command]
+
+    def fetch_data(self):
+        """Запрашивает данные у обработчика и обновляет интерфейс."""
+        try:
+            # Запрос последних данных у обработчика
+            last_data = self.get_data()
+            if last_data:
+                timestamp = last_data.get("time")
+                value = last_data.get("value")
+                if timestamp is not None and value is not None:
+                    self.data_tab.update_data(timestamp, value)
+        except Exception as e:
+            print(f"Ошибка при получении данных: {e}")

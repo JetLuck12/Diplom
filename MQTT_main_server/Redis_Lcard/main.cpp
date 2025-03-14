@@ -13,6 +13,8 @@ void on_message(struct mosquitto*, void* obj, const struct mosquitto_message* me
         // Преобразуем payload в строку
         std::string payload(static_cast<char*>(message->payload), message->payloadlen);
 
+        std::cout << payload << "\n";
+
         try {
             // Десериализуем MQTTMessage
             MQTTCmdMessage mqttMsg = MQTTCmdMessage::fromJson(message->topic, payload);
@@ -27,18 +29,20 @@ void on_message(struct mosquitto*, void* obj, const struct mosquitto_message* me
 
 int main() {
     try {
-        MQTTHandler mqtt("192.168.98.20", 1883);
+        std::string local = "localhost";
+        std::string non_local = "192.168.98.20";
+        MQTTHandler mqtt(local, 1883);
         if (!mqtt.connect()) {
             std::cerr << "Failed to connect to MQTT broker." << std::endl;
             return 1;
         }
 
-        DeviceManager manager(false, mqtt);
+        DeviceManager manager(true, mqtt);
         manager.init();
 
         // Подписка на топик с командами
         mqtt.subscribe("lcard/commands", [&manager](const std::string& message) {
-            std::cout << "Message received\n";
+            std::cout << "Message received" << message << "\n";
             MQTTCmdMessage msg = MQTTCmdMessage::fromJson("lcard/commands", message);
             manager.handle_command(msg);
         });
