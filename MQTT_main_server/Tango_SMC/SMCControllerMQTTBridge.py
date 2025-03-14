@@ -131,11 +131,11 @@ class SMCControllerMQTTBridge:
     def publish_data(self, topic : str, axis, data):
         """Публикация данных в канал `smc/data`."""
         if (topic == "smc/commands"):
-            topic = "smc/data"
+            res_topic = "smc/data"
         else:
-            topic = "smc/inner_data"
+            res_topic = "smc/inner_data"
         message = {"axis": axis, "data": data}
-        self.client.publish(topic, json.dumps(message))
+        self.client.publish(res_topic, json.dumps(message))
         print(f"Published data to {topic}: {message}")
 
     def publish_error(self, error_message, context=""):

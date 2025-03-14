@@ -4,12 +4,15 @@ import json
 from Handlers.IHandler import IHandler
 import gui_module
 from Utils.MQTTMessage import MQTTMessage
+from Utils.MQTTCmdMessage import MQTTCmdMessage
+from Utils.MQTTRespMessage import MQTTRespMessage
+from PyQt5.QtCore import QTimer
 
 
 class LCardHandler(IHandler):
     """Обработчик для взаимодействия с LCard через MQTT."""
 
-    def __init__(self, name: str, mqtt_client: mqtt.Client):
+    def __init__(self, name: str, mqtt_client: mqtt.Client, timer : QTimer = None):
         super().__init__(name, mqtt_client)
         self.command_topic = f"{name}/commands"  # Топик для отправки команд
         self.data_topic = f"{name}/data"        # Топик для получения данных
@@ -21,6 +24,8 @@ class LCardHandler(IHandler):
 
         self.data_tab : gui_module.DataTab = None
         self.info_tab : gui_module.ControlTab = None
+
+        self.timer = timer
 
         # Настраиваем подписки на необходимые топики
         #self.mqtt_client.on_message = self.on_message
@@ -50,9 +55,9 @@ class LCardHandler(IHandler):
         if (msg.command == "get_data_since"):
             self.data_tab.data.clear()
         elif msg.command == "start":
-            self.data_tab.timer.start(100)
+            self.timer.start(100)
         elif msg.command == "stop":
-            self.data_tab.timer.stop()
+            self.timer.stop()
 
         self.mqtt_client.publish(msg.topic, msg.to_json())
         self.info_tab.error_status.append(f"[LCardHandler] Sent command to {msg.command}: {msg}")
@@ -81,7 +86,7 @@ class LCardHandler(IHandler):
         topic = message.topic
         payload = message.payload.decode('utf-8')
         try:
-            response = json.loads(payload)
+            response = MQTTRespMessage.from_json(payload)
             data = json.loads(response.get("response"))
             if data.get("type") == "single":
                 values = data.get("data")
@@ -106,7 +111,7 @@ class LCardHandler(IHandler):
         payload = message.payload.decode('utf-8')
 
         try:
-            data = json.loads(payload)
+            data = MQTTRespMessage.from_json(payload)
             self.info_tab.error_status.append(f"[LCardHandler] Error received: {data}")
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[LCardHandler] Failed to decode message on topic {topic}: {payload}")
@@ -122,10 +127,9 @@ class LCardHandler(IHandler):
         """Запрашивает данные у обработчика и обновляет интерфейс."""
         try:
             # Запрос последних данных у обработчика
-            last_data = self.get_data()
-            if last_data:
-                timestamp = last_data.get("time")
-                value = last_data.get("value")
+            if self.last_data:
+                timestamp = self.last_data.get("time")
+                value = self.last_data.get("value")
                 if timestamp is not None and value is not None:
                     self.data_tab.update_data(timestamp, value)
         except Exception as e:

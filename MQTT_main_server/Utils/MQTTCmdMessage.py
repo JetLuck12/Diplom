@@ -1,24 +1,19 @@
+from Utils.MQTTMessage import MQTTMessage
 import json
 import time
 
-
-class MQTTMessage:
-    def __init__(self, topic, device=None, time = time.time()):
-        """
-        Инициализация сообщения MQTT.
-
-        :param topic: MQTT топик для публикации
-        :param device: Имя устройства (если необходимо)
-        :param time: Время отправки
-        """
-        self.topic = topic
-        self.device = device
-        self.time = time
+class MQTTCmdMessage(MQTTMessage):
+    def __init__(self, topic, device, command, params, time = time.time()):
+        super().__init__(topic, device, time)
+        self.command = command
+        self.params = params or {}
 
     def to_json(self):
         """Возвращает сообщение в формате JSON."""
         message = {
             "topic": self.topic,
+            "command": self.command,
+            "params": self.params,
             "device": self.device,
             "time": self.time
         }
@@ -30,8 +25,10 @@ class MQTTMessage:
         """Создает объект MQTTMessage из JSON строки."""
         try:
             data = json.loads(json_data)
-            return MQTTMessage(
+            return MQTTCmdMessage(
                 topic=data.get("topic"),
+                command=data.get("command"),
+                params=data.get("params"),
                 device=data.get("device"),
                 time=data.get("time")
             )
@@ -40,4 +37,5 @@ class MQTTMessage:
 
     def __str__(self):
         """Возвращает строковое представление сообщения."""
-        return (f"MQTTMessage(topic={self.topic}, device={self.device}")
+        return (f"MQTTMessage(topic={self.topic}, command={self.command}, params={self.params}, "
+                f"device={self.device}, time={self.time})")

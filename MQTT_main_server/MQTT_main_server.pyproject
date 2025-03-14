@@ -20,7 +20,8 @@
         "main_computer.py",
         "Calibrator/Calibrator.py",
         "Calibrator/__init__.py",
-        "Utils/Multithread_data.py",
-        "1.json"
+        "1.json",
+        "Utils/MQTTRespMessage.py",
+        "Utils/MQTTCmdMessage.py"
     ]
 }

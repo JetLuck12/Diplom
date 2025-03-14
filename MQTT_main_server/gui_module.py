@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import (
 )
 from datetime import datetime
 from Utils.MQTTMessage import MQTTMessage
+from Utils.MQTTCmdMessage import MQTTCmdMessage
+from Utils.MQTTRespMessage import MQTTRespMessage
 from main_computer import MainComputer
 from Calibrator.Calibrator import Calibrator
 from PyQt5.QtCore import QTimer
@@ -28,8 +30,6 @@ class DataTab(QWidget):
         layout.addWidget(self.graph_widget)
 
         self.setLayout(layout)
-
-        self.timer = QTimer()
 
     def update_data(self, timestamp, value):
         # Преобразуем timestamp в "час:минута:секунда"
@@ -151,7 +151,7 @@ class ControlTab(QWidget):
         command = self.command_selector.currentText().split(" ")[0]
         params = [field.text() for field in self.argument_fields]
         topic = f"{device}/commands"
-        payload = MQTTMessage(topic=topic,
+        payload = MQTTCmdMessage(topic=topic,
                     command=command,
                     params=params,
                     device=device)
@@ -228,8 +228,12 @@ class MainWindow(QMainWindow):
         self.data_tab = DataTab(self.mqtt_handler)
         self.control_tab = ControlTab(self.mqtt_handler)
 
+        self.timer = QTimer()
+
         if "lcard" in self.mqtt_handler.handlers.keys():
-            self.data_tab.timer.timeout.connect(self.mqtt_handler.handlers["lcard"].fetch_data)
+            self.mqtt_handler.handlers["lcard"].timer = self.timer
+            self.timer.timeout.connect(self.mqtt_handler.handlers["lcard"].fetch_data)
+            self.timer.start(100)
 
         for (name, handler) in self.mqtt_handler.handlers.items():
             if (name == "lcard"):

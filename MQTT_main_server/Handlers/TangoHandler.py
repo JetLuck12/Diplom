@@ -1,10 +1,11 @@
 # This Python file uses the following encoding: utf-8
 from Handlers.IHandler import IHandler
 from Utils.MQTTMessage import MQTTMessage
+from Utils.MQTTCmdMessage import MQTTCmdMessage
+from Utils.MQTTRespMessage import MQTTRespMessage
 import paho.mqtt.client as mqtt
 import json
 import time
-import Utils.Multithread_data as mt_data
 
 
 class TangoHandler(IHandler):
@@ -18,7 +19,7 @@ class TangoHandler(IHandler):
         self.smc_errors_topic = f"{name}/errors"
         self.error_state = "Stable"  # Хранит текущее состояние ошибки
         self.last_data = None  # Хранит последние полученные данные
-        self.inner_data  = mt_data.Shared_data(json.dumps({}))
+        self.inner_data  = None
 
         # Подписка на каналы
         #self.mqtt_client.on_message = self.on_message
@@ -79,7 +80,7 @@ class TangoHandler(IHandler):
         payload = message.payload.decode('utf-8')
 
         try:
-            data = json.loads(payload)
+            data = MQTTRespMessage.from_json(payload)
             self.last_data = data
             self.info_tab.error_status.append(f"[TangoHandler] Data received: {data}")
         except json.JSONDecodeError:
@@ -92,7 +93,8 @@ class TangoHandler(IHandler):
         topic = message.topic
         payload = message.payload.decode('utf-8')
         try:
-            self.inner_data.write_value(json.loads(payload))
+            data = MQTTRespMessage.from_json(payload)
+            self.inner_data = data
             print("Received inner data: {data}")
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
@@ -105,7 +107,7 @@ class TangoHandler(IHandler):
         payload = message.payload.decode('utf-8')
 
         try:
-            data = json.loads(payload)
+            data = MQTTRespMessage.from_json(payload)
             self.error_state = data["error"]
             self.info_tab.error_status.append(f"[TangoHandler] Error received: {data}")
         except json.JSONDecodeError:
@@ -120,10 +122,10 @@ class TangoHandler(IHandler):
         return self.commands[command]
 
     def get_axis_pos(self, axis : int):
-        msg = MQTTMessage("smc/inner_commands", "get_position", [axis], "smc")
+        msg = MQTTCmdMessage(topic="smc/inner_commands", command="get_position", params=[axis], device="smc")
         print(f"Message sent : {msg}")
         self.send_command(msg)
-        data = self.inner_data.read_value()
-        return data
+        time.sleep(0.3)
+        return self.inner_data
 
 
