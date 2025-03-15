@@ -12,23 +12,17 @@ class TangoHandler(IHandler):
     """Обработчик для взаимодействия с SMC через MQTT."""
     def __init__(self, name: str, mqtt_client: mqtt.Client):
         super().__init__(name, mqtt_client)
-        self.smc_command_topic = f"{name}/commands"
-        self.smc_inner_command_topic = f"{name}/inner_commands"
-        self.smc_inner_data_topic = f"{name}/inner_data"
-        self.smc_data_topic = f"{name}/data"
-        self.smc_errors_topic = f"{name}/errors"
+        self.smc_command_topic = "smc/commands"
+        self.smc_inner_command_topic = "smc/inner_commands"
+        self.smc_inner_data_topic = "smc/inner_data"
+        self.smc_data_topic = "smc/data"
+        self.smc_errors_topic = "smc/errors"
         self.error_state = "Stable"  # Хранит текущее состояние ошибки
         self.last_data = None  # Хранит последние полученные данные
         self.inner_data  = None
 
         # Подписка на каналы
         #self.mqtt_client.on_message = self.on_message
-        self.mqtt_client.subscribe(self.smc_data_topic)
-        self.mqtt_client.subscribe(self.smc_inner_data_topic)
-        self.mqtt_client.subscribe(self.smc_errors_topic)
-        self.mqtt_client.message_callback_add(self.smc_data_topic, self.on_smc_data)
-        self.mqtt_client.message_callback_add(self.smc_errors_topic, self.on_smc_error)
-        self.mqtt_client.message_callback_add(self.smc_inner_data_topic, self.on_smc_inner_data)
 
         print(f"[TangoHandler] Subscribed to topics: {self.smc_data_topic}, {self.smc_errors_topic}")
 
@@ -42,6 +36,16 @@ class TangoHandler(IHandler):
                     "get_state": {"params": ["axis"], "description": "Get the state of the axis"},
                     "get_position": {"params": ["axis"], "description": "Get the position of the axis"},
                 }
+
+    def subscribe(self):
+        self.mqtt_client.subscribe(self.smc_data_topic)
+        self.mqtt_client.subscribe(self.smc_inner_data_topic)
+        self.mqtt_client.subscribe(self.smc_errors_topic)
+
+    def set_callback(self):
+        self.mqtt_client.message_callback_add(self.smc_data_topic, self.on_smc_data)
+        self.mqtt_client.message_callback_add(self.smc_errors_topic, self.on_smc_error)
+        self.mqtt_client.message_callback_add(self.smc_inner_data_topic, self.on_smc_inner_data)
 
     def send_command(self, msg : MQTTMessage):
         """
@@ -76,6 +80,7 @@ class TangoHandler(IHandler):
         """
         Обработка входящих сообщений MQTT.
         """
+        print(message)
         topic = message.topic
         payload = message.payload.decode('utf-8')
 
@@ -94,7 +99,7 @@ class TangoHandler(IHandler):
         payload = message.payload.decode('utf-8')
         try:
             data = MQTTRespMessage.from_json(payload)
-            self.inner_data = data
+            self.inner_data = data.response
             print("Received inner data: {data}")
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")

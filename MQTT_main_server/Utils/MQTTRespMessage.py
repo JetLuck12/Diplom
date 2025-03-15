@@ -12,7 +12,7 @@ class MQTTRespMessage(MQTTMessage):
         message = {
             "topic": self.topic,
             "device": self.device,
-            "response": self.response,
+            "response": json.dumps(self.response),
             "time": self.time
         }
         message = json.dumps(message)
@@ -26,6 +26,7 @@ class MQTTRespMessage(MQTTMessage):
             return MQTTRespMessage(
                 topic=data.get("topic"),
                 device=data.get("device"),
+                response=json.loads(data.get("response")),
                 time=data.get("time")
             )
         except json.JSONDecodeError as e:
@@ -33,5 +34,6 @@ class MQTTRespMessage(MQTTMessage):
 
     def __str__(self):
         """Возвращает строковое представление сообщения."""
-        return (f"MQTTMessage(topic={self.topic},"
-                f"device={self.device}, time={self.time}")
+        return (f"MQTTMessage(topic={self.topic}, "
+                f"device={self.device}, "
+                f"responce={self.response}, time={self.time}")

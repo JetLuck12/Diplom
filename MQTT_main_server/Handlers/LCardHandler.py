@@ -2,9 +2,9 @@
 import paho.mqtt.client as mqtt
 import json
 from Handlers.IHandler import IHandler
-import gui_module
+from GUI.ControlTab import ControlTab
+from GUI.DataTab import DataTab
 from Utils.MQTTMessage import MQTTMessage
-from Utils.MQTTCmdMessage import MQTTCmdMessage
 from Utils.MQTTRespMessage import MQTTRespMessage
 from PyQt5.QtCore import QTimer
 
@@ -22,18 +22,13 @@ class LCardHandler(IHandler):
         self.last_data = None                   # Последние полученные данные
         self.error_state = None                 # Последнее состояние ошибок
 
-        self.data_tab : gui_module.DataTab = None
-        self.info_tab : gui_module.ControlTab = None
+        self.data_tab : DataTab = None
+        self.info_tab : ControlTab = None
 
         self.timer = timer
 
         # Настраиваем подписки на необходимые топики
         #self.mqtt_client.on_message = self.on_message
-        self.mqtt_client.message_callback_add(self.data_topic, self.on_lcard_data)
-        self.mqtt_client.message_callback_add(self.error_topic, self.on_lcard_error)
-        self.mqtt_client.subscribe(self.data_topic)
-        self.mqtt_client.subscribe(self.error_topic)
-        print(f"[LCardHandler] Subscribed to topics: {self.data_topic}, {self.error_topic}")
 
         self.commands = {
                     "start": {"params": [], "description": "Start measurement"},
@@ -42,6 +37,14 @@ class LCardHandler(IHandler):
                     "get_data_since": {"params": ["start_timestamp", "end_timestamp"], "description": "Get data since timestamp"},
                     "get_continuous_data" : {"params": [], "description":"get data in real time"}
                 }
+
+    def subscribe(self):
+        self.mqtt_client.subscribe(self.data_topic)
+        self.mqtt_client.subscribe(self.error_topic)
+
+    def set_callback(self):
+        self.mqtt_client.message_callback_add(self.data_topic, self.on_lcard_data)
+        self.mqtt_client.message_callback_add(self.error_topic, self.on_lcard_error)
 
 
     def send_command(self, msg : MQTTMessage):

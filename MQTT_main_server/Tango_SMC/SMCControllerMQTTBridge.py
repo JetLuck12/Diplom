@@ -10,6 +10,8 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(project_root)
 
 from Utils.MQTTMessage import MQTTMessage
+from Utils.MQTTCmdMessage import MQTTCmdMessage
+from Utils.MQTTRespMessage import MQTTRespMessage
 
 class SMCControllerMQTTBridge:
     def __init__(self, mqtt_broker, mqtt_port, mqtt_topic_prefix, smc_controller):
@@ -70,7 +72,7 @@ class SMCControllerMQTTBridge:
         except json.JSONDecodeError as e:
             print(f"Ошибка парсинга JSON: {e}")
 
-        msg = MQTTMessage.from_json(message_str)
+        msg = MQTTCmdMessage.from_json(message_str)
         print(msg)
 
         if topic != "smc/commands" and topic != "smc/inner_commands":
@@ -81,7 +83,7 @@ class SMCControllerMQTTBridge:
         except json.JSONDecodeError:
             self.publish_error("Invalid JSON format", topic)
 
-    def handle_command(self, topic : str, message : MQTTMessage):
+    def handle_command(self, topic : str, message : MQTTCmdMessage):
         """Обработка команд от MQTT."""
         command = message.command
         axis = message.params[0]
@@ -134,9 +136,9 @@ class SMCControllerMQTTBridge:
             res_topic = "smc/data"
         else:
             res_topic = "smc/inner_data"
-        message = {"axis": axis, "data": data}
-        self.client.publish(res_topic, json.dumps(message))
-        print(f"Published data to {topic}: {message}")
+        message = MQTTRespMessage(res_topic, "smc", response={"axis": axis, "data": data})
+        self.client.publish(res_topic, message.to_json())
+        print(f"Published data to {res_topic}: {message}")
 
     def publish_error(self, error_message, context=""):
         """Публикация ошибок в канал `smc/errors`."""
