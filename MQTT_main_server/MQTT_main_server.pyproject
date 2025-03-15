@@ -6,7 +6,7 @@
         "Tango_SMC/SMCControllerMQTTBridge.py",
         "Tango_SMC/smc100_new.py",
         "Tango_SMC/smc_macro.py",
-        "gui_module.py",
+        "GUI/gui_module.py",
         "__init__.py",
         "main.py",
         "test.py",
@@ -22,6 +22,10 @@
         "Calibrator/__init__.py",
         "1.json",
         "Utils/MQTTRespMessage.py",
-        "Utils/MQTTCmdMessage.py"
+        "Utils/MQTTCmdMessage.py",
+        "GUI/DataTab.py",
+        "GUI/ControlTab.py",
+        "GUI/CalibrationTab.py",
+        "GUI/__init__.py"
     ]
 }

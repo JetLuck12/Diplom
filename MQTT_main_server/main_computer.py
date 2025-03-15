@@ -36,6 +36,9 @@ class MainComputer:
     def on_connect(self, client, userdata, flags, rc):
         """Обработчик подключения."""
         if rc == 0:
+            for handler in self.handlers.values():
+                handler.subscribe()
+                handler.set_callback()
             print("Connected to MQTT broker!")
         else:
             print(f"Connection failed with code {rc}")
@@ -45,6 +48,7 @@ class MainComputer:
 
     def on_message(self, client, userdata, message):
         """Обработчик сообщений."""
+        print(message)
         topic = message.topic
         payload = message.payload.decode("utf-8")
         try:
