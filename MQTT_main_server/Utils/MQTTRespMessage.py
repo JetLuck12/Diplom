@@ -3,9 +3,9 @@ import time
 import json
 
 class MQTTRespMessage(MQTTMessage):
-    def __init__(self, topic, device, response, time = time.time()):
+    def __init__(self, topic, device, response : json, time = time.time()):
         super().__init__(topic, device, time)
-        self.response = response
+        self.response : json = response
 
     def to_json(self):
         """Возвращает сообщение в формате JSON."""

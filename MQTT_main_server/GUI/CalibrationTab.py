@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QFileDialog
+    QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QFileDialog, QComboBox, QHBoxLayout
 )
 
 class CalibrationTab(QWidget):
@@ -15,8 +15,17 @@ class CalibrationTab(QWidget):
         self.status_output = QTextEdit()
         self.status_output.setReadOnly(True)
 
+        # Выбор оси фотодиода
+        self.photodiod_axis_label = QLabel("Ось фотодиода:")
+        self.photodiod_axis_selector = QComboBox()
+
         # Компоновка
         layout = QVBoxLayout()
+        axis_layout = QHBoxLayout()
+        axis_layout.addWidget(self.photodiod_axis_label)
+        axis_layout.addWidget(self.photodiod_axis_selector)
+
+        layout.addLayout(axis_layout)
         layout.addWidget(self.calibrate_button)
         layout.addWidget(self.save_config_button)
         layout.addWidget(self.load_config_button)
@@ -30,6 +39,7 @@ class CalibrationTab(QWidget):
         self.save_config_button.clicked.connect(self.save_configuration)
         self.load_config_button.clicked.connect(self.load_configuration)
         self.calibrate_from_config_button.clicked.connect(self.calibrate_from_config)
+        self.photodiod_axis_selector.currentIndexChanged.connect(self.on_axis_selected)
 
     def start_calibration(self):
         self.status_output.append("Запуск калибровки...")
@@ -52,3 +62,17 @@ class CalibrationTab(QWidget):
         self.status_output.append("Запуск калибровки по сохраненной конфигурации...")
         self.calibrator.calibrate_from_config()
         self.status_output.append("Калибровка по конфигурации завершена.")
+
+    def update_axis_list(self):
+        """Обновляет список доступных осей фотодиода."""
+        self.photodiod_axis_selector.clear()
+        self.photodiod_axis_selector.addItems(self.calibrator.main.handlers["smc"].axes)
+
+    def showEvent(self, event):
+        """Обновляет список осей при переходе на вкладку."""
+        self.update_axis_list()
+        super().showEvent(event)
+
+    def on_axis_selected(self):
+        selected_axis = self.photodiod_axis_selector.currentText()
+        self.calibrator.diod_axis = selected_axis

@@ -37,7 +37,8 @@ int main() {
             return 1;
         }
 
-        DeviceManager manager(true, mqtt);
+        bool is_test = true;
+        DeviceManager manager(is_test, mqtt);
         manager.init();
 
         // Подписка на топик с командами

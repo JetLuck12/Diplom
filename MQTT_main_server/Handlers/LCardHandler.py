@@ -89,8 +89,8 @@ class LCardHandler(IHandler):
         topic = message.topic
         payload = message.payload.decode('utf-8')
         try:
-            response = MQTTRespMessage.from_json(payload)
-            data = json.loads(response.get("response"))
+            msg = MQTTRespMessage.from_json(payload)
+            data = msg.response
             if data.get("type") == "single":
                 values = data.get("data")
                 timestamp, value = list(values.items())[0]

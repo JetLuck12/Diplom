@@ -4,19 +4,15 @@ MQTTCmdMessage::MQTTCmdMessage(const std::string &topic,
                                const std::string& command,
                                const std::map<std::string, std::string>& params,
                                const std::string &device,
-                               const std::string &serverTimestamp,
-                               const std::string &clientResponse)
-    : MQTTMessage(topic, device, clientResponse),
+                               const std::string &time)
+    : MQTTMessage(topic, device, time),
     command(command),
-    params(params),
-    serverTimestamp(serverTimestamp),
-    clientResponse(clientResponse){}
+    params(params){}
 
 json MQTTCmdMessage::toJSON() const  {
     json message = ((MQTTMessage*)(this))->toJSON();
     message["command"] = command;
-    message["server_timestamp"] = std::string{serverTimestamp};
-    message["client_response"] = std::string{clientResponse};
+    message["time"] = time;
     return message;
 }
 
@@ -31,8 +27,7 @@ std::string MQTTCmdMessage::toString() const {
     }
 
     oss << "}, device=" << device
-        << ", server_timestamp=" << serverTimestamp
-        << ", client_response=" << clientResponse
+        << ", time=" << time
         << ")";
 
     return oss.str();
@@ -46,12 +41,15 @@ MQTTCmdMessage MQTTCmdMessage::fromJson(const std::string& topic, const std::str
         if(data.contains("params") && data["params"].is_object()){
             params = data["params"];
         }
+        std::string command = data.at("command");
+        std::string device = data.at("device");
+        int time = data.at("time");
         return MQTTCmdMessage(
             topic,
-            data.at("command"),
+            command,
             params,
-            data.at("device"),
-            data.at("server_timestamp")
+            device,
+            std::to_string(time)
             );
     } catch (const std::exception &e) {
         throw std::runtime_error(std::string("JSON parsing error: ") + e.what());

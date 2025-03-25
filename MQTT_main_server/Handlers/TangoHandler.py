@@ -6,6 +6,7 @@ from Utils.MQTTRespMessage import MQTTRespMessage
 import paho.mqtt.client as mqtt
 import json
 import time
+from Utils.Sync_Data import Sync_Data
 
 
 class TangoHandler(IHandler):
@@ -19,7 +20,7 @@ class TangoHandler(IHandler):
         self.smc_errors_topic = "smc/errors"
         self.error_state = "Stable"  # Хранит текущее состояние ошибки
         self.last_data = None  # Хранит последние полученные данные
-        self.inner_data  = None
+        self.inner_data  = Sync_Data()
 
         # Подписка на каналы
         #self.mqtt_client.on_message = self.on_message
@@ -58,6 +59,16 @@ class TangoHandler(IHandler):
         if cmd == "add" and not axis in self.axes:
             self.axes.append(axis)
         self.mqtt_client.publish(msg.topic, msg.to_json())
+        print(f"[TangoHandler] Sent command to {msg.topic}: {msg}")
+
+    def send_inner_command(self, msg : MQTTMessage):
+        """
+        Отправляет команду в MQTT для SMCControllerMQTTBridge.
+
+        :param msg: Сообщение, завернутое в MQTTMessage
+        """
+        self.send_command(msg)
+        return self.inner_data.read_value()
         print(f"[TangoHandler] Sent command to {msg.topic}: {msg}")
 
     def is_error(self):
@@ -99,7 +110,7 @@ class TangoHandler(IHandler):
         payload = message.payload.decode('utf-8')
         try:
             data = MQTTRespMessage.from_json(payload)
-            self.inner_data = data.response
+            self.inner_data.write_value(data.response)
             print("Received inner data: {data}")
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
@@ -125,12 +136,5 @@ class TangoHandler(IHandler):
 
     def get_commands_details(self, command):
         return self.commands[command]
-
-    def get_axis_pos(self, axis : int):
-        msg = MQTTCmdMessage(topic="smc/inner_commands", command="get_position", params=[axis], device="smc")
-        print(f"Message sent : {msg}")
-        self.send_command(msg)
-        time.sleep(0.3)
-        return self.inner_data
 
 

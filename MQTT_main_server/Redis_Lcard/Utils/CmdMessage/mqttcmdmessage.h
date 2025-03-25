@@ -12,8 +12,7 @@ public:
                    const std::string& command,
                    const std::map<std::string, std::string>& params,
                    const std::string &device = "",
-                   const std::string &serverTimestamp = {},
-                   const std::string &clientResponse = {});
+                   const std::string &time = {});
 
     json toJSON() const override;
     std::string toString() const override;
@@ -27,8 +26,6 @@ public:
 private:
     std::string command;
     std::map<std::string, std::string> params;
-    std::string serverTimestamp;
-    std::string clientResponse;
 };
 
 #endif // MQTTCMDMESSAGE_H

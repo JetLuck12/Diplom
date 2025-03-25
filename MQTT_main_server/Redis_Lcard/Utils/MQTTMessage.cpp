@@ -6,13 +6,13 @@ MQTTMessage::MQTTMessage(const std::string &topic,
                          const std::string &clientResponse)
     : topic(topic),
     device(device),
-    clientResponse(clientResponse) {}
+    time(time) {}
 
 json MQTTMessage::toJSON() const {
     json message = {
         {"topic", topic},
         {"device", device},
-        {"client_response", std::string{clientResponse}}
+        {"time", time}
     };
     return message;
 }
@@ -30,15 +30,15 @@ MQTTMessage MQTTMessage::fromJson(const std::string &topic, const std::string &j
     }
 }
 
-void MQTTMessage::setClientResponse(double serverReceivedTimestamp) {
-    this->clientResponse = serverReceivedTimestamp;
+void MQTTMessage::setClientResponse(std::string serverReceivedTimestamp) {
+    this->time = serverReceivedTimestamp;
 }
 
 std::string MQTTMessage::toString() const {
     std::ostringstream oss;
     oss << "MQTTMessage(topic=" << topic
         << ", device=" << device
-        << ", client_response=" << clientResponse
+        << ", client_response=" << time
         << ")";
 
     return oss.str();

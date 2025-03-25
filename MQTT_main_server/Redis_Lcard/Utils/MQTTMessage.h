@@ -12,12 +12,12 @@ class MQTTMessage {
 public:
     MQTTMessage(const std::string &topic,
                 const std::string &device = "",
-                const std::string &clientResponse = "");
+                const std::string &time = std::to_string(std::time(nullptr)));
 
     virtual json toJSON() const;
     static MQTTMessage fromJson(const std::string &topic, const std::string &jsonData);
 
-    void setClientResponse(double serverReceivedTimestamp = std::time(nullptr));
+    void setClientResponse(std::string time = "");
 
     virtual std::string toString() const;
 
@@ -27,7 +27,7 @@ public:
 protected:
     std::string topic;
     std::string device;
-    std::string clientResponse;
+    std::string time;
 };
 
 #endif // MQTTMESSAGE_H

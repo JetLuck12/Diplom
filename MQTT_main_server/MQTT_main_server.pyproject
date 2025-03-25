@@ -26,6 +26,7 @@
         "GUI/DataTab.py",
         "GUI/ControlTab.py",
         "GUI/CalibrationTab.py",
-        "GUI/__init__.py"
+        "GUI/__init__.py",
+        "Utils/Sync_Data.py"
     ]
 }

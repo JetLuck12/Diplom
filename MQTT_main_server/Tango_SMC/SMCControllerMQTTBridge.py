@@ -97,6 +97,12 @@ class SMCControllerMQTTBridge:
                     self.publish_data(topic, axis, {"status": "Moving", "position": position})
                 else:
                     raise ValueError("Missing axis or position parameter")
+            elif command == "move_max":
+                if axis is not None:
+                    self.smc_controller.StartOne(axis, self.smc_controller.attributes["upper_limit"] if params[0] else self.smc_controller.attributes["lower_limit"] )
+                    self.publish_data(topic, axis, {"status": "Moving", "position": position})
+                else:
+                    raise ValueError("Missing axis parameter")
             elif command == "stop":
                 if axis is not None:
                     self.smc_controller.StopOne(axis)
@@ -123,6 +129,12 @@ class SMCControllerMQTTBridge:
                 if axis is not None:
                     position = self.smc_controller.ReadOne(axis)
                     self.publish_data(topic, axis, {"position": position})
+                else:
+                    raise ValueError("Missing axis parameter")
+            elif command == "get_params":
+                if axis is not None:
+                    response = self.smc_controller.attributes[axis][params[0]]
+                    self.publish_data(topic, axis, {"param": response})
                 else:
                     raise ValueError("Missing axis parameter")
             else:
