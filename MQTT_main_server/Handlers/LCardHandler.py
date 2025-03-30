@@ -55,7 +55,7 @@ class LCardHandler(IHandler):
         :param axis: Номер оси (для совместимости с IHandler, не используется в LCard)
         :param args: Дополнительные параметры команды (например, timestamp для get_data_since)
         """
-        if (msg.command == "get_data_since"):
+        if (msg.command == "get_data_since" and self.data is not None):
             self.data_tab.data.clear()
         elif msg.command == "start":
             self.timer.start(100)
@@ -94,15 +94,16 @@ class LCardHandler(IHandler):
             if data.get("type") == "single":
                 values = data.get("data")
                 timestamp, value = list(values.items())[0]
-                if timestamp is not None and value is not None:
+                if timestamp is not None and value is not None and self.data_tab is not None:
                     self.data_tab.update_data(int(timestamp), value)
                 print(f"[LCardHandler] Single data received: {data}")
             else:
-                self.data_tab.data.clear()
-                values : dict = data.get("data")
-                for time, value in list(values.items()):
-                    if time is not None and value is not None:
-                        self.data_tab.update_data(time, value)
+                if self.data_tab is not None:
+                    self.data_tab.data.clear()
+                    values : dict = data.get("data")
+                    for time, value in list(values.items()):
+                        if time is not None and value is not None:
+                            self.data_tab.update_data(time, value)
         except json.JSONDecodeError:
             print(f"[LCardHandler] Failed to decode message on topic {topic}: {payload}")
 
@@ -133,7 +134,7 @@ class LCardHandler(IHandler):
             if self.last_data:
                 timestamp = self.last_data.get("time")
                 value = self.last_data.get("value")
-                if timestamp is not None and value is not None:
+                if timestamp is not None and value is not None and self.data_tab is not None:
                     self.data_tab.update_data(timestamp, value)
         except Exception as e:
             print(f"Ошибка при получении данных: {e}")

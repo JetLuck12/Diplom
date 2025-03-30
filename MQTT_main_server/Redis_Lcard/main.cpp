@@ -31,13 +31,15 @@ int main() {
     try {
         std::string local = "localhost";
         std::string non_local = "192.168.98.20";
+
+        bool is_test = true;
+        std::cout << "Connecting to server on " << (is_test ? local : non_local) << "\n";
         MQTTHandler mqtt(local, 1883);
         if (!mqtt.connect()) {
             std::cerr << "Failed to connect to MQTT broker." << std::endl;
             return 1;
         }
 
-        bool is_test = true;
         DeviceManager manager(is_test, mqtt);
         manager.init();
 
