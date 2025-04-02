@@ -155,8 +155,8 @@ class SMCControllerMQTTBridge:
     def publish_error(self, error_message, context=""):
         """Публикация ошибок в канал `smc/errors`."""
         topic = f"{self.mqtt_topic_prefix}/errors"
-        message = {"error": error_message, "context": context}
-        self.client.publish(topic, json.dumps(message))
+        message = MQTTRespMessage(topic, "smc", response={"error": error_message, "context": context})
+        self.client.publish(topic, message.to_json())
         print(f"Published error to {topic}: {message}")
 
 
