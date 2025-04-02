@@ -29,11 +29,11 @@ void on_message(struct mosquitto*, void* obj, const struct mosquitto_message* me
 
 int main() {
     try {
-        std::string local = "localhost";
-        std::string non_local = "192.168.98.20";
+        std::string local = "192.168.97.20";
+        std::string non_local = "192.168.97.189";
 
-        bool is_test = true;
-        std::cout << "Connecting to server on " << (is_test ? local : non_local) << "\n";
+        bool is_test = false;
+        std::cout << "Connecting to server on " << local << "\n";
         MQTTHandler mqtt(local, 1883);
         if (!mqtt.connect()) {
             std::cerr << "Failed to connect to MQTT broker." << std::endl;

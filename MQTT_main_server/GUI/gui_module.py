@@ -10,9 +10,9 @@ from GUI.ControlTab import ControlTab
 from GUI.DataTab import DataTab
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, handler : MainComputer):
         super().__init__()
-        self.mqtt_handler = MainComputer(broker_address="localhost", port=1883, client_id="main_computer")
+        self.mqtt_handler = handler
         self.mqtt_handler.connect()
 
         # Основной интерфейс
@@ -50,9 +50,9 @@ class MainWindow(QMainWindow):
         event.accept()
 
 
-def start_gui():
+def start_gui(handler : MainComputer):
     app = QApplication(sys.argv)
-    main_window = MainWindow()
+    main_window = MainWindow(handler)
     main_window.show()
     sys.exit(app.exec_())
 
