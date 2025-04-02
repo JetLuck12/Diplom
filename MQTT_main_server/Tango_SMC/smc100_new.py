@@ -472,25 +472,23 @@ class SMC100(object):
     self.close()
     
 class SMCMotorHW(object):
-    DefaultPort = "/dev/ttyUSB0"
 
-    def __init__(self, port=DefaultPort):
-        if self.port is None :
-            print('Connecting to SMC100 on %s' % port)
+    def __init__(self, port):
+        print('Connecting to SMC100 on %s' % port)
 
-            self.port = serial.Serial(
-                port = port,
-                baudrate = 57600,
-                bytesize = 8,
-                stopbits = 1,
-                parity = 'N',
-                xonxoff = True,
-                timeout = 0.050)
+        self.port = serial.Serial(
+            port = port,
+            baudrate = 57600,
+            bytesize = 8,
+            stopbits = 1,
+            parity = 'N',
+            xonxoff = True,
+            timeout = 0.050)
 
-            if self.port.isOpen():
-                print('Serial port is opened.')
-            else:
-                print('Failed to open serial port.')
+        if self.port.isOpen():
+            print('Serial port is opened.')
+        else:
+            print('Failed to open serial port.')
 
         self._motions = {}
 
