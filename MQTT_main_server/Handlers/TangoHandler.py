@@ -124,8 +124,9 @@ class TangoHandler(IHandler):
 
         try:
             data = MQTTRespMessage.from_json(payload)
-            self.error_state = data["error"]
-            self.info_tab.error_status.append(f"[TangoHandler] Error received: {data}")
+            self.error_state = data.responce["error"]
+            context = data.responce["context"]
+            self.info_tab.error_status.append(f"[TangoHandler] Error received while executing {context}: {data}")
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
 
