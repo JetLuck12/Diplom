@@ -374,11 +374,9 @@ class SMC100(object):
 
       self._port.flushOutput()
 
-#      self._port.write(tosend)
-      self._port.write(tosend.encode())
+      self._port.write(tosend)
 
-#      self._port.write('\r\n')
-      self._port.write(b'\r\n')
+      self._port.write('\r\n')
 
       self._port.flush()
 

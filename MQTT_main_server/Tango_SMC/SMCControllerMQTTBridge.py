@@ -176,11 +176,13 @@ def main():
     # Выбор контроллера (Mock или реальный)
     print("Starting SMC Controller MQTT Bridge...")
     test_mode = False  # True для использования MockSMCMotorHW
-    smc_controller = MockSMCMotorHW() if test_mode else SMCBaseMotorController(inst=None, props={"Port": "COM10"})
+    smc_controller = MockSMCMotorHW() if test_mode else SMCBaseMotorController(port = "COM18")
+
+    userinterface = "192.168.25.20"
 
     # Создаем MQTT мост
     mqtt_bridge = SMCControllerMQTTBridge(
-        mqtt_broker="192.168.97.20",
+        mqtt_broker=userinterface,
         mqtt_port=1883,
         mqtt_topic_prefix="smc",
         smc_controller=smc_controller

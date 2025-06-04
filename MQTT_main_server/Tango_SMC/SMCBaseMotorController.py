@@ -21,27 +21,29 @@ class SMCBaseMotorController():
 
         for axis in range(1, num_devices+1):
             try:
-                motor = SMC100(smcID=axis, _port=self._port)
-                motor.reset_and_configure()
+                motor = SMC100(smcID=axis, port=self._port)
+                motor.sendcmd("ID", "?", True)
+                motor.home(False)
 
-                self.motors[str(axis)] = motor
+                self.motors[axis] = motor
 
                 print(f"[INIT] Motor {axis} initialized on {port}")
             except Exception as e:
                 print(f"[WARN] Failed to initialize motor {axis}: {e}")
 
+        print(self.motors)
     def StartOne(self, axis, position):
-        self._get_motor(axis).move_absolute_um(position)
+        self._get_motor(axis).move_absolute_mm(position)
 
     def Home(self, axis):
-        self._get_motor(axis).home()
+        self._get_motor(axis).home(False)
 
     def StopOne(self, axis):
         self._get_motor(axis).stop()
 
     def StateOne(self, axis):
         motor = self._get_motor(axis)
-        return (motor.get_position_um(), motor.get_status())
+        return (motor.get_position_mm(), motor.get_status())
 
     def ReadOne(self, axis):
         return self._get_motor(axis).get_position_um()

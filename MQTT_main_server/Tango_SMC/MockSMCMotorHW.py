@@ -86,7 +86,7 @@ class MockSMCMotorHW:
             time.sleep(0.5)  # Имитация движения
             device["position"] = device["lower_limit"]
             device["state"] = "On"
-            print(f"Axis {axis} reached position {device["lower_limit"]}.")
+            print(f"Axis {axis} reached position {device['lower_limit']}.")
         else:
             raise ValueError(f"Axis {axis} not found.")
 

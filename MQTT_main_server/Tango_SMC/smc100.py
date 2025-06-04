@@ -67,10 +67,6 @@ class SMC100(object):
   has native units of mm. A more general implementation will move the move
   methods into a stage class.
   """
-
-  _port = None
-  _smcID = None
-
   _silent = True
 
   _sleepfunc = time.sleep
@@ -298,7 +294,7 @@ class SMC100(object):
 
     If any disable state is encountered, the method will raise an error,
     UNLESS you were waiting for that state. This is because if we wait for
-    READY_FROM_MOVING, and the stage gets stuck we transition into
+    READY_FROM_MOVING, and the stage gets stuck we transfition into
     DISABLE_FROM_MOVING and then STAY THERE FOREVER.
 
     The state encountered is returned.
@@ -372,8 +368,8 @@ class SMC100(object):
 
       self._port.flushOutput()
 
-      self._port.write(tosend)
-      self._port.write('\r\n')
+      self._port.write(tosend.encode())
+      self._port.write(str('\r\n').encode())
 
       self._port.flush()
 
@@ -429,7 +425,7 @@ class SMC100(object):
     line = str()
     #print 'reading line',
     while not done:
-      c = self._port.read()
+      c = self._port.read().decode()
       # ignore \r since it is part of the line terminator
       if len(c) == 0:
         raise SMC100ReadTimeOutException()
@@ -453,11 +449,3 @@ class SMC100(object):
     else:
       prefix = ' ' + args[0]
       message = args[1]
-
-  def close(self):
-    if self._port:
-      self._port.close()
-      self._port = None
-
-  def __del__(self):
-    self.close()

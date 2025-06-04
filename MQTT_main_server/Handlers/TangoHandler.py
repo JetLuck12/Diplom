@@ -25,8 +25,6 @@ class TangoHandler(IHandler):
         # Подписка на каналы
         #self.mqtt_client.on_message = self.on_message
 
-        print(f"[TangoHandler] Subscribed to topics: {self.smc_data_topic}, {self.smc_errors_topic}")
-
         self.axes = []
 
         self.commands = {
@@ -41,6 +39,7 @@ class TangoHandler(IHandler):
         self.mqtt_client.subscribe(self.smc_data_topic)
         self.mqtt_client.subscribe(self.smc_inner_data_topic)
         self.mqtt_client.subscribe(self.smc_errors_topic)
+        print(f"[TangoHandler] Subscribed to topics: {self.smc_data_topic}, {self.smc_errors_topic}")
 
     def set_callback(self):
         self.mqtt_client.message_callback_add(self.smc_data_topic, self.on_smc_data)
