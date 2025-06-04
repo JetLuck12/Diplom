@@ -27,6 +27,7 @@
         "GUI/ControlTab.py",
         "GUI/CalibrationTab.py",
         "GUI/__init__.py",
-        "Utils/Sync_Data.py"
+        "Utils/Sync_Data.py",
+        "Tango_SMC/smc100.py"
     ]
 }

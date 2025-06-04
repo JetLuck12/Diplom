@@ -32,8 +32,7 @@ class TangoHandler(IHandler):
         self.commands = {
                     "move": {"params": ["axis", "position"], "description": "Move to position"},
                     "stop": {"params": ["axis"], "description": "Stop movement"},
-                    "add": {"params": ["axis"], "description": "Add a device"},
-                    "delete": {"params": ["axis"], "description": "Delete a device"},
+                    "home": {"params": ["axis"], "description": "Move motor in initial position"},
                     "get_state": {"params": ["axis"], "description": "Get the state of the axis"},
                     "get_position": {"params": ["axis"], "description": "Get the position of the axis"},
                 }
@@ -54,10 +53,6 @@ class TangoHandler(IHandler):
 
         :param msg: Сообщение, завернутое в MQTTMessage
         """
-        axis = msg.params[0]
-        cmd = msg.command
-        if cmd == "add" and not axis in self.axes:
-            self.axes.append(axis)
         self.mqtt_client.publish(msg.topic, msg.to_json())
         print(f"[TangoHandler] Sent command to {msg.topic}: {msg}")
 
@@ -68,8 +63,9 @@ class TangoHandler(IHandler):
         :param msg: Сообщение, завернутое в MQTTMessage
         """
         self.send_command(msg)
-        return self.inner_data.read_value()
         print(f"[TangoHandler] Sent command to {msg.topic}: {msg}")
+        return self.inner_data.read_value()
+
 
     def is_error(self):
         """
@@ -111,7 +107,7 @@ class TangoHandler(IHandler):
         try:
             data = MQTTRespMessage.from_json(payload)
             self.inner_data.write_value(data.response)
-            print("Received inner data: {data}")
+            print(f"Received inner data: {data.response}")
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
 
@@ -124,9 +120,9 @@ class TangoHandler(IHandler):
 
         try:
             data = MQTTRespMessage.from_json(payload)
-            self.error_state = data.responce["error"]
-            context = data.responce["context"]
-            self.info_tab.error_status.append(f"[TangoHandler] Error received while executing {context}: {data}")
+            self.error_state = data.response["error"]
+            context = data.response["context"]
+            self.info_tab.error_status.append(f"[TangoHandler] Error received while executing {context}: {self.error_state}")
         except json.JSONDecodeError:
             self.info_tab.error_status.append(f"[TangoHandler] Failed to decode message on topic {topic}: {payload}")
 
@@ -137,5 +133,10 @@ class TangoHandler(IHandler):
 
     def get_commands_details(self, command):
         return self.commands[command]
+
+    def get_motors(self):
+        msg = MQTTCmdMessage("smc/inner_commands", "smc", "get_motors", {})
+        return self.send_inner_command(msg)
+
 
 

@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QFileDialog, QComboBox, QHBoxLayout
+    QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QFileDialog, QComboBox, QHBoxLayout, QLineEdit
 )
 
 class CalibrationTab(QWidget):
@@ -9,11 +9,17 @@ class CalibrationTab(QWidget):
 
         # UI элементы
         self.calibrate_button = QPushButton("Калибровать")
+        self.refresh_axes_button = QPushButton("Обновить оси")
         self.save_config_button = QPushButton("Сохранить конфигурацию")
         self.load_config_button = QPushButton("Загрузить конфигурацию")
-        self.calibrate_from_config_button = QPushButton("Калибровать из конфигурации")
         self.status_output = QTextEdit()
         self.status_output.setReadOnly(True)
+
+        # Новые поля для ширины и высоты
+        self.width_input = QLineEdit()
+        self.width_input.setPlaceholderText("Ширина")
+        self.height_input = QLineEdit()
+        self.height_input.setPlaceholderText("Высота")
 
         # Выбор оси фотодиода
         self.photodiod_axis_label = QLabel("Ось фотодиода:")
@@ -21,25 +27,35 @@ class CalibrationTab(QWidget):
 
         # Компоновка
         layout = QVBoxLayout()
+
+        # Линия выбора оси
         axis_layout = QHBoxLayout()
         axis_layout.addWidget(self.photodiod_axis_label)
         axis_layout.addWidget(self.photodiod_axis_selector)
-
+        axis_layout.addWidget(self.refresh_axes_button)
         layout.addLayout(axis_layout)
-        layout.addWidget(self.calibrate_button)
+
+        # Линия с кнопкой "Калибровать" и параметрами
+        calibration_layout = QHBoxLayout()
+        calibration_layout.addWidget(self.calibrate_button)
+        calibration_layout.addWidget(self.width_input)
+        calibration_layout.addWidget(self.height_input)
+        layout.addLayout(calibration_layout)
+
         layout.addWidget(self.save_config_button)
         layout.addWidget(self.load_config_button)
-        layout.addWidget(self.calibrate_from_config_button)
+
         layout.addWidget(QLabel("Статус:"))
         layout.addWidget(self.status_output)
+
         self.setLayout(layout)
 
         # Подключение сигналов
         self.calibrate_button.clicked.connect(self.start_calibration)
         self.save_config_button.clicked.connect(self.save_configuration)
         self.load_config_button.clicked.connect(self.load_configuration)
-        self.calibrate_from_config_button.clicked.connect(self.calibrate_from_config)
         self.photodiod_axis_selector.currentIndexChanged.connect(self.on_axis_selected)
+        self.refresh_axes_button.clicked.connect(self.update_axis_list)
 
     def start_calibration(self):
         self.status_output.append("Запуск калибровки...")
@@ -66,12 +82,9 @@ class CalibrationTab(QWidget):
     def update_axis_list(self):
         """Обновляет список доступных осей фотодиода."""
         self.photodiod_axis_selector.clear()
-        self.photodiod_axis_selector.addItems(self.calibrator.main.handlers["smc"].axes)
-
-    def showEvent(self, event):
-        """Обновляет список осей при переходе на вкладку."""
-        self.update_axis_list()
-        super().showEvent(event)
+        axis_int_list = self.calibrator.main.handlers["smc"].get_motors()
+        axis_str_list = [str(n) for n in axis_int_list]
+        self.photodiod_axis_selector.addItems(axis_str_list)
 
     def on_axis_selected(self):
         selected_axis = self.photodiod_axis_selector.currentText()
