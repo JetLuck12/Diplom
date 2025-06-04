@@ -9,7 +9,6 @@ import sys
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(project_root)
 
-from Utils.MQTTMessage import MQTTMessage
 from Utils.MQTTCmdMessage import MQTTCmdMessage
 from Utils.MQTTRespMessage import MQTTRespMessage
 
@@ -86,7 +85,24 @@ class SMCControllerMQTTBridge:
     def handle_command(self, topic : str, message : MQTTCmdMessage):
         """Обработка команд от MQTT."""
         command = message.command
-        axis = message.params[0]
+        cmd_topic = message.topic
+        resp_topic = ""
+        if (cmd_topic == "smc/commands"):
+            resp_topic = "smc/data"
+        else:
+            resp_topic = "smc/inner_data"
+
+        try:
+            if command == "get_motors":
+                response = list(self.smc_controller.motors.keys())
+                msg = MQTTRespMessage(resp_topic, "smc", response)
+                self.publish_data(msg)
+                return
+        except Exception as e:
+            self.publish_error(str(e), f"Command: {command}")
+            return
+
+        axis = int(message.params[0])
         params = message.params[1:]
 
         try:
@@ -94,47 +110,43 @@ class SMCControllerMQTTBridge:
                 position = float(params[0])
                 if axis is not None and position is not None:
                     self.smc_controller.StartOne(axis, position)
-                    self.publish_data(topic, axis, {"status": "Moving", "position": position})
+                    msg = MQTTRespMessage(topic, axis, {"status": "Moving", "position": position})
+                    self.publish_data(msg)
                 else:
                     raise ValueError("Missing axis or position parameter")
-            elif command == "move_max":
+            elif command == "home":
                 if axis is not None:
-                    self.smc_controller.StartOne(axis, self.smc_controller.attributes["upper_limit"] if params[0] else self.smc_controller.attributes["lower_limit"] )
-                    self.publish_data(topic, axis, {"status": "Moving", "position": position})
+                    self.smc_controller.Home(axis)
+                    msg = MQTTRespMessage(topic, axis, {"status": "Moving", "position": position})
+                    self.publish_data(msg)
                 else:
                     raise ValueError("Missing axis parameter")
             elif command == "stop":
                 if axis is not None:
                     self.smc_controller.StopOne(axis)
-                    self.publish_data(topic, axis, {"status": "Stopped"})
-                else:
-                    raise ValueError("Missing axis parameter")
-            elif command == "add":
-                if axis is not None:
-                    self.smc_controller.AddDevice(axis)
-                else:
-                    raise ValueError("Missing axis parameter")
-            elif command == "delete":
-                if axis is not None:
-                    self.smc_controller.DeleteDevice(axis)
+                    msg = MQTTRespMessage(topic, axis, {"status": "Stopped"})
+                    self.publish_data(msg)
                 else:
                     raise ValueError("Missing axis parameter")
             elif command == "get_state":
                 if axis is not None:
                     _, status = self.smc_controller.StateOne(axis)
-                    self.publish_data(topic, axis, {"status": status})
+                    msg = MQTTRespMessage(topic, axis, {"status": status})
+                    self.publish_data(msg)
                 else:
                     raise ValueError("Missing axis parameter")
             elif command == "get_position":
                 if axis is not None:
                     position = self.smc_controller.ReadOne(axis)
-                    self.publish_data(topic, axis, {"position": position})
+                    msg = MQTTRespMessage(topic, axis, {"position": position})
+                    self.publish_data(msg)
                 else:
                     raise ValueError("Missing axis parameter")
             elif command == "get_params":
                 if axis is not None:
                     response = self.smc_controller.attributes[axis][params[0]]
-                    self.publish_data(topic, axis, {"param": response})
+                    msg = MQTTRespMessage(topic, axis, {"param": response})
+                    self.publish_data(msg)
                 else:
                     raise ValueError("Missing axis parameter")
             else:
@@ -142,15 +154,15 @@ class SMCControllerMQTTBridge:
         except Exception as e:
             self.publish_error(str(e), f"Command: {command}")
 
-    def publish_data(self, topic : str, axis, data):
+    def publish_data(self, msg : MQTTRespMessage):
         """Публикация данных в канал `smc/data`."""
+        topic = msg.topic
         if (topic == "smc/commands"):
             res_topic = "smc/data"
         else:
             res_topic = "smc/inner_data"
-        message = MQTTRespMessage(res_topic, "smc", response={"axis": axis, "data": data})
-        self.client.publish(res_topic, message.to_json())
-        print(f"Published data to {res_topic}: {message}")
+        self.client.publish(res_topic, msg.to_json())
+        print(f"Published data to {res_topic}: {msg}")
 
     def publish_error(self, error_message, context=""):
         """Публикация ошибок в канал `smc/errors`."""

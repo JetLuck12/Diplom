@@ -32,7 +32,7 @@ int main() {
         std::string local = "192.168.97.20";
         std::string non_local = "192.168.97.189";
 
-        bool is_test = false;
+        bool is_test = true;
         std::cout << "Connecting to server on " << local << "\n";
         MQTTHandler mqtt(local, 1883);
         if (!mqtt.connect()) {
