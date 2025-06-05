@@ -1,0 +1,1044 @@
+
+15:22:21: Программа неожиданно завершилась.
+15:22:21: Процесс был завершён принудительно.
+
+15:22:21: Запускается C:\Users\User\AppData\Local\Programs\Python\Python310\python.exe -u C:\Users\User\Documents\Diplom\MQTT_main_server\Tango_SMC\SMCControllerMQTTBridge.py...
+Starting SMC Controller MQTT Bridge...
+[INIT] Motor 1 initialized on COM18
+[INIT] Motor 2 initialized on COM18
+[INIT] Motor 3 initialized on COM18
+[WARN] Failed to initialize motor 4: Read timed out
+[INIT] Motor 5 initialized on COM18
+[INIT] Motor 6 initialized on COM18
+[INIT] Motor 7 initialized on COM18
+[INIT] Motor 8 initialized on COM18
+[INIT] Motor 9 initialized on COM18
+[INIT] Motor 10 initialized on COM18
+[WARN] Failed to initialize motor 11: RS232 corruption detected: 0x20
+[WARN] Failed to initialize motor 12: Invalid response to ID: UD:28/10/2011
+[WARN] Failed to initialize motor 13: Read timed out
+[WARN] Failed to initialize motor 14: Read timed out
+[WARN] Failed to initialize motor 15: Read timed out
+[WARN] Failed to initialize motor 16: Read timed out
+{1: <smc100.SMC100 object at 0x000002068E0B1DB0>, 2: <smc100.SMC100 object at 0x000002068E0B21D0>, 3: <smc100.SMC100 object at 0x000002068E0B2260>, 5: <smc100.SMC100 object at 0x000002068E0B23E0>, 6: <smc100.SMC100 object at 0x000002068E0B2350>, 7: <smc100.SMC100 object at 0x000002068E0B2470>, 8: <smc100.SMC100 object at 0x000002068E0B2560>, 9: <smc100.SMC100 object at 0x000002068E0B25C0>, 10: <smc100.SMC100 object at 0x000002068E0B2620>}
+Connected to MQTT broker at 192.168.25.20:1883
+MQTT Bridge is running. Press Ctrl+C to exit.
+Connected to MQTT broker successfully.
+Subscribed to topic: smc/commands
+Subscribed to topic: smc/inner_commands
+smc/commands
+Получено сообщение: {"topic": "smc/commands", "command": "move", "params": ["1", "20"], "device": "smc", "time": 1749111347.3295243}
+MQTTMessage(topic=smc/commands, command=move, params=['1', '20'], device=smc, time=1749111347.3295243)
+Received message on topic smc/commands: <paho.mqtt.client.MQTTMessage object at 0x000002068E0C0D60>
+status:
+  state: MOVING
+  position: 0.00254
+status:
+  state: MOVING
+  position: 0.01518
+status:
+  state: MOVING
+  position: 0.04229
+status:
+  state: MOVING
+  position: 0.0631
+status:
+  state: MOVING
+  position: 0.0971
+status:
+  state: MOVING
+  position: 0.1179
+status:
+  state: MOVING
+  position: 0.13869
+status:
+  state: MOVING
+  position: 0.1595
+status:
+  state: MOVING
+  position: 0.18029
+status:
+  state: MOVING
+  position: 0.2139
+status:
+  state: MOVING
+  position: 0.2415
+status:
+  state: MOVING
+  position: 0.26229
+status:
+  state: MOVING
+  position: 0.28949
+status:
+  state: MOVING
+  position: 0.3171
+status:
+  state: MOVING
+  position: 0.34429
+status:
+  state: MOVING
+  position: 0.3719
+status:
+  state: MOVING
+  position: 0.3927
+status:
+  state: MOVING
+  position: 0.41349
+status:
+  state: MOVING
+  position: 0.4343
+status:
+  state: MOVING
+  position: 0.45509
+status:
+  state: MOVING
+  position: 0.4759
+status:
+  state: MOVING
+  position: 0.4967
+status:
+  state: MOVING
+  position: 0.51749
+status:
+  state: MOVING
+  position: 0.5451
+status:
+  state: MOVING
+  position: 0.5659
+status:
+  state: MOVING
+  position: 0.58669
+status:
+  state: MOVING
+  position: 0.6075
+status:
+  state: MOVING
+  position: 0.62829
+status:
+  state: MOVING
+  position: 0.6491
+status:
+  state: MOVING
+  position: 0.6699
+status:
+  state: MOVING
+  position: 0.69069
+status:
+  state: MOVING
+  position: 0.7115
+status:
+  state: MOVING
+  position: 0.73229
+status:
+  state: MOVING
+  position: 0.7531
+status:
+  state: MOVING
+  position: 0.7739
+status:
+  state: MOVING
+  position: 0.7951
+status:
+  state: MOVING
+  position: 0.8159
+status:
+  state: MOVING
+  position: 0.83669
+status:
+  state: MOVING
+  position: 0.8575
+status:
+  state: MOVING
+  position: 0.87829
+status:
+  state: MOVING
+  position: 0.8991
+status:
+  state: MOVING
+  position: 0.9199
+status:
+  state: MOVING
+  position: 0.94069
+status:
+  state: MOVING
+  position: 0.9615
+status:
+  state: MOVING
+  position: 0.98229
+status:
+  state: MOVING
+  position: 1.0031
+status:
+  state: MOVING
+  position: 1.0239
+status:
+  state: MOVING
+  position: 1.0511
+status:
+  state: MOVING
+  position: 1.07869
+status:
+  state: MOVING
+  position: 1.0995
+status:
+  state: MOVING
+  position: 1.1267
+status:
+  state: MOVING
+  position: 1.1543
+status:
+  state: MOVING
+  position: 1.1815
+status:
+  state: MOVING
+  position: 1.21549
+status:
+  state: MOVING
+  position: 1.24269
+status:
+  state: MOVING
+  position: 1.2763
+status:
+  state: MOVING
+  position: 1.30389
+status:
+  state: MOVING
+  position: 1.3247
+status:
+  state: MOVING
+  position: 1.3455
+status:
+  state: MOVING
+  position: 1.3727
+status:
+  state: MOVING
+  position: 1.40629
+status:
+  state: MOVING
+  position: 1.4339
+status:
+  state: MOVING
+  position: 1.4547
+status:
+  state: MOVING
+  position: 1.4883
+status:
+  state: MOVING
+  position: 1.5159
+status:
+  state: MOVING
+  position: 1.53669
+status:
+  state: MOVING
+  position: 1.5575
+status:
+  state: MOVING
+  position: 1.5783
+status:
+  state: MOVING
+  position: 1.6055
+status:
+  state: MOVING
+  position: 1.63309
+status:
+  state: MOVING
+  position: 1.6539
+status:
+  state: MOVING
+  position: 1.6743
+status:
+  state: MOVING
+  position: 1.70789
+status:
+  state: MOVING
+  position: 1.73549
+status:
+  state: MOVING
+  position: 1.7631
+status:
+  state: MOVING
+  position: 1.7839
+status:
+  state: MOVING
+  position: 1.80469
+status:
+  state: MOVING
+  position: 1.83189
+status:
+  state: MOVING
+  position: 1.8655
+status:
+  state: MOVING
+  position: 1.8995
+status:
+  state: MOVING
+  position: 1.92029
+status:
+  state: MOVING
+  position: 1.9411
+status:
+  state: MOVING
+  position: 1.9619
+status:
+  state: MOVING
+  position: 1.98269
+status:
+  state: MOVING
+  position: 2.00989
+status:
+  state: MOVING
+  position: 2.03749
+status:
+  state: MOVING
+  position: 2.0583
+status:
+  state: MOVING
+  position: 2.07909
+status:
+  state: MOVING
+  position: 2.0999
+status:
+  state: MOVING
+  position: 2.1207
+status:
+  state: MOVING
+  position: 2.1419
+status:
+  state: MOVING
+  position: 2.16309
+status:
+  state: MOVING
+  position: 2.19029
+status:
+  state: MOVING
+  position: 2.2243
+status:
+  state: MOVING
+  position: 2.24509
+status:
+  state: MOVING
+  position: 2.27229
+status:
+  state: MOVING
+  position: 2.3059
+status:
+  state: MOVING
+  position: 2.33949
+status:
+  state: MOVING
+  position: 2.37349
+status:
+  state: MOVING
+  position: 2.3943
+status:
+  state: MOVING
+  position: 2.4151
+status:
+  state: MOVING
+  position: 2.43589
+status:
+  state: MOVING
+  position: 2.46989
+status:
+  state: MOVING
+  position: 2.4967
+status:
+  state: MOVING
+  position: 2.5307
+status:
+  state: MOVING
+  position: 2.55149
+status:
+  state: MOVING
+  position: 2.5723
+status:
+  state: MOVING
+  position: 2.5931
+status:
+  state: MOVING
+  position: 2.61389
+status:
+  state: MOVING
+  position: 2.6347
+status:
+  state: MOVING
+  position: 2.65549
+status:
+  state: MOVING
+  position: 2.6763
+status:
+  state: MOVING
+  position: 2.6971
+status:
+  state: MOVING
+  position: 2.71789
+status:
+  state: MOVING
+  position: 2.7387
+status:
+  state: MOVING
+  position: 2.75949
+status:
+  state: MOVING
+  position: 2.7803
+status:
+  state: MOVING
+  position: 2.8011
+status:
+  state: MOVING
+  position: 2.82189
+status:
+  state: MOVING
+  position: 2.84909
+status:
+  state: MOVING
+  position: 2.88309
+status:
+  state: MOVING
+  position: 2.90389
+status:
+  state: MOVING
+  position: 2.9247
+status:
+  state: MOVING
+  position: 2.94549
+status:
+  state: MOVING
+  position: 2.9663
+status:
+  state: MOVING
+  position: 2.99329
+status:
+  state: MOVING
+  position: 3.02089
+status:
+  state: MOVING
+  position: 3.0417
+status:
+  state: MOVING
+  position: 3.0625
+status:
+  state: MOVING
+  position: 3.08329
+status:
+  state: MOVING
+  position: 3.1041
+status:
+  state: MOVING
+  position: 3.12489
+status:
+  state: MOVING
+  position: 3.15209
+status:
+  state: MOVING
+  position: 3.1861
+status:
+  state: MOVING
+  position: 3.20689
+status:
+  state: MOVING
+  position: 3.2277
+status:
+  state: MOVING
+  position: 3.24849
+status:
+  state: MOVING
+  position: 3.2693
+status:
+  state: MOVING
+  position: 3.2901
+status:
+  state: MOVING
+  position: 3.31089
+status:
+  state: MOVING
+  position: 3.3317
+status:
+  state: MOVING
+  position: 3.35249
+status:
+  state: MOVING
+  position: 3.3861
+status:
+  state: MOVING
+  position: 3.41969
+status:
+  state: MOVING
+  position: 3.4533
+status:
+  state: MOVING
+  position: 3.48689
+status:
+  state: MOVING
+  position: 3.52049
+status:
+  state: MOVING
+  position: 3.5545
+status:
+  state: MOVING
+  position: 3.57529
+status:
+  state: MOVING
+  position: 3.5961
+status:
+  state: MOVING
+  position: 3.6233
+status:
+  state: MOVING
+  position: 3.6505
+status:
+  state: MOVING
+  position: 3.6713
+status:
+  state: MOVING
+  position: 3.69209
+status:
+  state: MOVING
+  position: 3.7129
+status:
+  state: MOVING
+  position: 3.73369
+status:
+  state: MOVING
+  position: 3.7545
+status:
+  state: MOVING
+  position: 3.7753
+status:
+  state: MOVING
+  position: 3.79609
+status:
+  state: MOVING
+  position: 3.8169
+status:
+  state: MOVING
+  position: 3.83769
+status:
+  state: MOVING
+  position: 3.8585
+status:
+  state: MOVING
+  position: 3.8793
+status:
+  state: MOVING
+  position: 3.90009
+status:
+  state: MOVING
+  position: 3.9209
+status:
+  state: MOVING
+  position: 3.94169
+status:
+  state: MOVING
+  position: 3.9625
+status:
+  state: MOVING
+  position: 3.9833
+status:
+  state: MOVING
+  position: 4.00409
+status:
+  state: MOVING
+  position: 4.0317
+status:
+  state: MOVING
+  position: 4.0525
+status:
+  state: MOVING
+  position: 4.07329
+status:
+  state: MOVING
+  position: 4.0941
+status:
+  state: MOVING
+  position: 4.11489
+status:
+  state: MOVING
+  position: 4.1357
+status:
+  state: MOVING
+  position: 4.16929
+status:
+  state: MOVING
+  position: 4.2029
+status:
+  state: MOVING
+  position: 4.23649
+status:
+  state: MOVING
+  position: 4.26409
+status:
+  state: MOVING
+  position: 4.2849
+status:
+  state: MOVING
+  position: 4.30569
+status:
+  state: MOVING
+  position: 4.3265
+status:
+  state: MOVING
+  position: 4.36009
+status:
+  state: MOVING
+  position: 4.3937
+status:
+  state: MOVING
+  position: 4.4277
+status:
+  state: MOVING
+  position: 4.4485
+status:
+  state: MOVING
+  position: 4.4757
+status:
+  state: MOVING
+  position: 4.50329
+status:
+  state: MOVING
+  position: 4.52409
+status:
+  state: MOVING
+  position: 4.5449
+status:
+  state: MOVING
+  position: 4.56569
+status:
+  state: MOVING
+  position: 4.5865
+status:
+  state: MOVING
+  position: 4.60729
+status:
+  state: MOVING
+  position: 4.63449
+status:
+  state: MOVING
+  position: 4.6681
+status:
+  state: MOVING
+  position: 4.70169
+status:
+  state: MOVING
+  position: 4.7357
+status:
+  state: MOVING
+  position: 4.75649
+status:
+  state: MOVING
+  position: 4.7773
+status:
+  state: MOVING
+  position: 4.79809
+status:
+  state: MOVING
+  position: 4.8189
+status:
+  state: MOVING
+  position: 4.8397
+status:
+  state: MOVING
+  position: 4.86049
+status:
+  state: MOVING
+  position: 4.8813
+status:
+  state: MOVING
+  position: 4.90209
+status:
+  state: MOVING
+  position: 4.9229
+status:
+  state: MOVING
+  position: 4.9437
+status:
+  state: MOVING
+  position: 4.96449
+status:
+  state: MOVING
+  position: 4.9853
+status:
+  state: MOVING
+  position: 5.00609
+status:
+  state: MOVING
+  position: 5.03329
+status:
+  state: MOVING
+  position: 5.0669
+status:
+  state: MOVING
+  position: 5.10049
+status:
+  state: MOVING
+  position: 5.1341
+status:
+  state: MOVING
+  position: 5.16769
+status:
+  state: MOVING
+  position: 5.1953
+status:
+  state: MOVING
+  position: 5.21609
+status:
+  state: MOVING
+  position: 5.23649
+status:
+  state: MOVING
+  position: 5.2701
+status:
+  state: MOVING
+  position: 5.30369
+status:
+  state: MOVING
+  position: 5.3373
+status:
+  state: MOVING
+  position: 5.36489
+status:
+  state: MOVING
+  position: 5.3857
+status:
+  state: MOVING
+  position: 5.4065
+status:
+  state: MOVING
+  position: 5.4337
+status:
+  state: MOVING
+  position: 5.45489
+status:
+  state: MOVING
+  position: 5.47609
+status:
+  state: MOVING
+  position: 5.5029
+status:
+  state: MOVING
+  position: 5.53049
+status:
+  state: MOVING
+  position: 5.55129
+status:
+  state: MOVING
+  position: 5.5721
+status:
+  state: MOVING
+  position: 5.59289
+status:
+  state: MOVING
+  position: 5.6137
+status:
+  state: MOVING
+  position: 5.63449
+status:
+  state: MOVING
+  position: 5.65529
+status:
+  state: MOVING
+  position: 5.6761
+status:
+  state: MOVING
+  position: 5.69689
+status:
+  state: MOVING
+  position: 5.7177
+status:
+  state: MOVING
+  position: 5.73849
+status:
+  state: MOVING
+  position: 5.75929
+status:
+  state: MOVING
+  position: 5.7801
+status:
+  state: MOVING
+  position: 5.80089
+status:
+  state: MOVING
+  position: 5.8217
+status:
+  state: MOVING
+  position: 5.84249
+status:
+  state: MOVING
+  position: 5.86329
+status:
+  state: MOVING
+  position: 5.8841
+status:
+  state: MOVING
+  position: 5.90489
+status:
+  state: MOVING
+  position: 5.9385
+status:
+  state: MOVING
+  position: 5.96609
+status:
+  state: MOVING
+  position: 5.9935
+status:
+  state: MOVING
+  position: 6.0143
+status:
+  state: MOVING
+  position: 6.03509
+status:
+  state: MOVING
+  position: 6.0559
+status:
+  state: MOVING
+  position: 6.07669
+status:
+  state: MOVING
+  position: 6.0975
+status:
+  state: MOVING
+  position: 6.11829
+status:
+  state: MOVING
+  position: 6.13909
+status:
+  state: MOVING
+  position: 6.1599
+status:
+  state: MOVING
+  position: 6.18069
+status:
+  state: MOVING
+  position: 6.2015
+status:
+  state: MOVING
+  position: 6.22229
+status:
+  state: MOVING
+  position: 6.24309
+status:
+  state: MOVING
+  position: 6.2639
+status:
+  state: MOVING
+  position: 6.28469
+status:
+  state: MOVING
+  position: 6.3055
+status:
+  state: MOVING
+  position: 6.3327
+status:
+  state: MOVING
+  position: 6.36629
+status:
+  state: MOVING
+  position: 6.39389
+status:
+  state: MOVING
+  position: 6.4147
+status:
+  state: MOVING
+  position: 6.4371
+status:
+  state: MOVING
+  position: 6.4647
+status:
+  state: MOVING
+  position: 6.48549
+status:
+  state: MOVING
+  position: 6.5063
+status:
+  state: MOVING
+  position: 6.52709
+status:
+  state: MOVING
+  position: 6.55429
+status:
+  state: MOVING
+  position: 6.58189
+status:
+  state: MOVING
+  position: 6.6027
+status:
+  state: MOVING
+  position: 6.62349
+status:
+  state: MOVING
+  position: 6.64429
+status:
+  state: MOVING
+  position: 6.6651
+status:
+  state: MOVING
+  position: 6.69269
+status:
+  state: MOVING
+  position: 6.72029
+status:
+  state: MOVING
+  position: 6.74749
+status:
+  state: MOVING
+  position: 6.7815
+status:
+  state: MOVING
+  position: 6.80229
+status:
+  state: MOVING
+  position: 6.8231
+status:
+  state: MOVING
+  position: 6.84389
+status:
+  state: MOVING
+  position: 6.86469
+status:
+  state: MOVING
+  position: 6.8855
+status:
+  state: MOVING
+  position: 6.90629
+status:
+  state: MOVING
+  position: 6.93349
+status:
+  state: MOVING
+  position: 6.96109
+status:
+  state: MOVING
+  position: 6.9819
+status:
+  state: MOVING
+  position: 7.00269
+status:
+  state: MOVING
+  position: 7.0235
+status:
+  state: MOVING
+  position: 7.04429
+status:
+  state: MOVING
+  position: 7.06509
+status:
+  state: MOVING
+  position: 7.0859
+status:
+  state: MOVING
+  position: 7.1199
+status:
+  state: MOVING
+  position: 7.14069
+status:
+  state: MOVING
+  position: 7.16149
+status:
+  state: MOVING
+  position: 7.1823
+status:
+  state: MOVING
+  position: 7.20309
+status:
+  state: MOVING
+  position: 7.2239
+status:
+  state: MOVING
+  position: 7.24469
+status:
+  state: MOVING
+  position: 7.26549
+status:
+  state: MOVING
+  position: 7.29909
+status:
+  state: MOVING
+  position: 7.3331
+status:
+  state: MOVING
+  position: 7.35389
+status:
+  state: MOVING
+  position: 7.37469
+status:
+  state: MOVING
+  position: 7.39549
+status:
+  state: MOVING
+  position: 7.41629
+status:
+  state: MOVING
+  position: 7.4371
+status:
+  state: MOVING
+  position: 7.45789
+status:
+  state: MOVING
+  position: 7.4919
+status:
+  state: MOVING
+  position: 7.51269
+status:
+  state: MOVING
+  position: 7.5335
+status:
+  state: MOVING
+  position: 7.55429
+status:
+  state: MOVING
+  position: 7.57509
+status:
+  state: MOVING
+  position: 7.60229
+status:
+  state: MOVING
+  position: 7.6299
+status:
+  state: MOVING
+  position: 7.6571
+status:
+  state: MOVING
+  position: 7.69109
+status:
+  state: MOVING
+  position: 7.7119
+status:
+  state: MOVING
+  position: 7.73269
+status:
+  state: MOVING
+  position: 7.7535
+status:
+  state: MOVING
+  position: 7.77429
+status:
+  state: MOVING
+  position: 7.79509
+status:
+  state: MOVING
+  position: 7.8159
+status:
+  state: MOVING
+  position: 7.83669
+status:
+  state: MOVING
+  position: 7.8575
+status:
+  state: MOVING
+  position: 7.87829
+status:
+  state: MOVING
+  position: 7.89909
+status:
+  state: MOVING
+  position: 7.9199
+status:
+  state: MOVING
+  position: 7.94069
+status:
+  state: MOVING
+  position: 7.9615
+status:
+  state: MOVING
+  position: 7.98229
+Published error to smc/errors: MQTTMessage(topic=smc/errors, device=smc, responce={'error': 'Wait timed out', 'context': 'Command: move'}, time=1749111741.9525883
