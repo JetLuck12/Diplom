@@ -5,7 +5,7 @@ import time
 from math import floor
 
 # never wait for more than this e.g. during wait_states
-MAX_WAIT_TIME_SEC = 12
+MAX_WAIT_TIME_SEC = 20
 
 # time to wait after sending a command. This number has been arrived at by
 # trial and error
@@ -202,6 +202,7 @@ class SMC100(object):
         print('  state: HOMING commanded by SMC-RC')
       elif state == '28':
         print('  state: MOVING')
+        print(f"  position: {self.get_position_mm()}")
       elif state == '32':
         print('  state: READY from HOMING')
       elif state == '33':

@@ -33,7 +33,7 @@ class SMCBaseMotorController():
 
         print(self.motors)
     def StartOne(self, axis, position):
-        self._get_motor(axis).move_absolute_mm(position)
+        self._get_motor(axis).move_absolute_mm(position, True)
 
     def Home(self, axis):
         self._get_motor(axis).home(False)
@@ -46,7 +46,7 @@ class SMCBaseMotorController():
         return (motor.get_position_mm(), motor.get_status())
 
     def ReadOne(self, axis):
-        return self._get_motor(axis).get_position_um()
+        return self._get_motor(axis).get_position_mm()
 
     def _get_motor(self, axis):
         if axis not in self.motors:
